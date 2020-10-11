@@ -95,10 +95,10 @@ void BufferObject::subData(GLuint offset, const std::vector<T>& data)
 	switch (_type)
 	{
 	case BufferType::Array:
-		glBufferSubData(GL_ARRAY_BUFFER, offset, data.size() * sizeof(T), &data[0]);
+		glBufferSubData(GL_ARRAY_BUFFER, offset * sizeof(T), data.size() * sizeof(T), &data[0]);
 		break;
 	case BufferType::ElementArray:
-		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, data.size() * sizeof(T), &data[0]);
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset * sizeof(T), data.size() * sizeof(T), &data[0]);
 		break;
 	}
 }
