@@ -6,7 +6,7 @@
 #define ZRV_LIB
 #define _ZRV_BEGIN namespace zrv {
 #define _ZRV_END }
-#define _ZRV_SOURCE using namespace zrv
+#define _ZRV_SOURCE using namespace zrv;
 
 #endif
 

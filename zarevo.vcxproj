@@ -167,6 +167,7 @@
     <ClInclude Include="include\OpenGLWrapper\OglObjects\ShaderProgram.h" />
     <ClInclude Include="include\zarevo.h" />
     <ClInclude Include="include\zarevo_base.h" />
+    <ClInclude Include="include\zrv_logger.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\OglBase.cpp" />

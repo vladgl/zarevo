@@ -39,6 +39,9 @@
     <ClInclude Include="include\OpenGLWrapper\OglBase.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="include\zrv_logger.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ArrayObject.cpp">
