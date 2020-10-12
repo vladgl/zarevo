@@ -159,22 +159,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\OpenGLWrapper\Image2D.h" />
     <ClInclude Include="include\OpenGLWrapper\OglBase.h" />
     <ClInclude Include="include\OpenGLWrapper\OglObjects\ArrayObject.h" />
     <ClInclude Include="include\OpenGLWrapper\OglObjects\BufferObject.h" />
     <ClInclude Include="include\OpenGLWrapper\OglObjects\OglObject.h" />
     <ClInclude Include="include\OpenGLWrapper\OglObjects\Shader.h" />
     <ClInclude Include="include\OpenGLWrapper\OglObjects\ShaderProgram.h" />
+    <ClInclude Include="include\OpenGLWrapper\OglObjects\TextureObject.h" />
     <ClInclude Include="include\zarevo.h" />
     <ClInclude Include="include\zarevo_base.h" />
     <ClInclude Include="include\zrv_logger.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Image2D.cpp" />
     <ClCompile Include="src\OglBase.cpp" />
     <ClCompile Include="src\ArrayObject.cpp" />
     <ClCompile Include="src\BufferObject.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\ShaderProgram.cpp" />
+    <ClCompile Include="src\TextureObject.cpp" />
     <ClCompile Include="src\zarevo_base.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

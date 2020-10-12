@@ -6,6 +6,9 @@
 #include "OpenGLWrapper/OglObjects/BufferObject.h"
 #include "OpenGLWrapper/OglObjects/Shader.h"
 #include "OpenGLWrapper/OglObjects/ShaderProgram.h"
+#include "OpenGLWrapper/Image2D.h";
+#include "OpenGLWrapper/OglObjects/TextureObject.h";
+
 
 //todo
 	/*
