@@ -16,6 +16,10 @@ public:
 	void bind();
 	void release();
 	bool setImage(const Image2D& img);
+	std::string getLog()
+	{
+		return _error_str;
+	}
 private:
 	TextureType _type;
 	std::string _error_str;

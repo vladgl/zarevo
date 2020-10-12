@@ -37,12 +37,19 @@ public:
 	{
 		return _format;
 	}
+
+	int channels() const
+	{
+		return _channels;
+	}
+
 	const Image2D& flipX() const;
 	const Image2D& flipY() const;
 
 private:
 	GLubyte* _data;
 	Format _format;
+	int _channels;
 	int _width, _height;
 
 	Image2D() = delete;
