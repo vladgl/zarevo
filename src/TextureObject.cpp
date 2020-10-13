@@ -10,12 +10,15 @@ TextureObject::TextureObject(TextureType type, const std::string& obj_label) :
 	switch (_type)
 	{
 	case TextureType::Texture1D:
+		_gl_type = GL_TEXTURE_1D;
 		prefix = "1dm";
 		break;
 	case TextureType::Texture2D:
+		_gl_type = GL_TEXTURE_2D;
 		prefix = "2dm";
 		break;
 	case TextureType::Texture3D:
+		_gl_type = GL_TEXTURE_3D;
 		prefix = "3dm";
 		break;
 	}
@@ -23,7 +26,7 @@ TextureObject::TextureObject(TextureType type, const std::string& obj_label) :
 }
 
 TextureObject::TextureObject() :
-	OGL_OBJECT(""), _type(TextureType::Texture2D)
+	OGL_OBJECT(""), _type(TextureType::Texture2D), _gl_type(GL_TEXTURE_2D)
 {
 	glGenTextures(1, &_object_name);
 
@@ -36,39 +39,14 @@ TextureObject::~TextureObject()
 	glDeleteTextures(1, &_object_name);
 }
 
-void TextureObject::bind()
+void TextureObject::bind(unsigned short unit)
 {
-	GLenum type;
-	switch (_type)
-	{
-	case TextureType::Texture1D:
-		type = GL_TEXTURE_1D;
-		break;
-	case TextureType::Texture2D:
-		type = GL_TEXTURE_2D;
-		break;
-	case TextureType::Texture3D:
-		type = GL_TEXTURE_3D;
-		break;
-	}
-	glBindTexture(type, _object_name);
+	glActiveTexture(GL_TEXTURE0 + unit);
+	glBindTexture(_gl_type, _object_name);
 }
 void TextureObject::release()
 {
-	GLenum type;
-	switch (_type)
-	{
-	case TextureType::Texture1D:
-		type = GL_TEXTURE_1D;
-		break;
-	case TextureType::Texture2D:
-		type = GL_TEXTURE_2D;
-		break;
-	case TextureType::Texture3D:
-		type = GL_TEXTURE_3D;
-		break;
-	}
-	glBindTexture(type, 0);
+	glBindTexture(_gl_type, 0);
 }
 
 bool TextureObject::setImage(const Image2D& img)
@@ -99,9 +77,95 @@ bool TextureObject::setImage(const Image2D& img)
 		format = GL_RGBA;
 		break;
 	}
-
 	glTexImage2D(GL_TEXTURE_2D, 0, format, img.width(), img.height(), 0, format, GL_UNSIGNED_BYTE, img.rawData());
+}
+
+void TextureObject::setWrapping(Wrapping wrap_s_t)
+{
+	if (_gl_type == GL_TEXTURE_2D )
+	{
+		GLint param = GL_REPEAT;
+		switch (wrap_s_t)
+		{
+		case Wrapping::Repeat:
+			param = GL_REPEAT;
+			break;
+		case Wrapping::MirroredRepeat:
+			param = GL_MIRRORED_REPEAT;
+			break;
+		case Wrapping::ClampToEdge:
+			param = GL_CLAMP_TO_EDGE;
+			break;
+		}
+		glTexParameteri(_gl_type, GL_TEXTURE_WRAP_S, param);
+		glTexParameteri(_gl_type, GL_TEXTURE_WRAP_T, param);
+	}
+}
+void TextureObject::setWrapping(Wrapping wrap_s, Wrapping wrap_t)
+{
+	if (_gl_type == GL_TEXTURE_2D)
+	{
+		GLint param_s = GL_REPEAT, param_t = GL_REPEAT;
+		switch (wrap_s)
+		{
+		case Wrapping::Repeat:
+			param_s = GL_REPEAT;
+			break;
+		case Wrapping::MirroredRepeat:
+			param_s = GL_MIRRORED_REPEAT;
+			break;
+		case Wrapping::ClampToEdge:
+			param_s = GL_CLAMP_TO_EDGE;
+			break;
+		}
+		switch (wrap_t)
+		{
+		case Wrapping::Repeat:
+			param_t = GL_REPEAT;
+			break;
+		case Wrapping::MirroredRepeat:
+			param_t = GL_MIRRORED_REPEAT;
+			break;
+		case Wrapping::ClampToEdge:
+			param_t = GL_CLAMP_TO_EDGE;
+			break;
+		}
+		glTexParameteri(_gl_type, GL_TEXTURE_WRAP_S, param_s);
+		glTexParameteri(_gl_type, GL_TEXTURE_WRAP_T, param_t);
+	}
+}
+void TextureObject::setMagFilter(TextureFilter filter)
+{
+	if (_gl_type == GL_TEXTURE_2D)
+	{
+		GLint param = GL_LINEAR;
+		if (filter == TextureFilter::Nearest)
+			param = GL_NEAREST;
+		glTexParameteri(_gl_type, GL_TEXTURE_MAG_FILTER, param);
+	}
 
 }
+void TextureObject::setMinFilter(TextureFilter tex_filter, MipmapFilter mip_filter)
+{
+	if (_gl_type == GL_TEXTURE_2D)
+	{
+		GLint param = GL_LINEAR_MIPMAP_LINEAR;
+		if (tex_filter == TextureFilter::Linear && mip_filter == MipmapFilter::Nearest)
+			param = GL_LINEAR_MIPMAP_NEAREST;
+		else if (tex_filter == TextureFilter::Nearest && mip_filter == MipmapFilter::Linear)
+			param = GL_NEAREST_MIPMAP_LINEAR;
+		else if (tex_filter == TextureFilter::Nearest && mip_filter == MipmapFilter::Nearest)
+			param = GL_NEAREST_MIPMAP_NEAREST;
+
+
+		glTexParameteri(_gl_type, GL_TEXTURE_MAG_FILTER, param);
+	}
+}
+
+void TextureObject::generateMipmap()
+{
+	glGenerateMipmap(_gl_type);
+}
+
 
 _ZRV_END
