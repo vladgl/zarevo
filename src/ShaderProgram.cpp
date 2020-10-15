@@ -79,24 +79,24 @@ bool ShaderProgram::link()
 	return procError();
 }
 
-void ShaderProgram::use()
+void ShaderProgram::use() const
 {
 	glUseProgram(_object_name);
 }
 
-void ShaderProgram::release()
+void ShaderProgram::release() const
 {
 	glUseProgram(0);
 }
 
-GLint ShaderProgram::getUnifLoc(const GLchar* name)
+GLint ShaderProgram::getUnifLoc(const GLchar* name) const
 {
 	GLint loc;
 	loc = glGetUniformLocation(_object_name, name);
 	return loc;
 }
 
-GLint ShaderProgram::getAttribLoc(const GLchar* name)
+GLint ShaderProgram::getAttribLoc(const GLchar* name) const
 {
 	GLint loc;
 	loc = glGetAttribLocation(_object_name, name);

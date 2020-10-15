@@ -23,9 +23,9 @@
 #define _ZRV_END }
 #define _ZRV_SOURCE using namespace zrv;
 #endif
+#define GLEW_STATIC
 
 #include <GL/glew.h>
-#include <GL/gl.h>
 #include <vector>
 #include <string>
 
@@ -38,8 +38,8 @@ std::string getObjectTypeNameByIdentifier(GLenum identifier, const std::string& 
 enum AttribLoc
 {
 	A_POSITION = 0,
-	A_NORMALS = 1,
-	A_TEX_COORD = 2
+	A_NORMALS = 2,
+	A_TEX_COORD = 1
 };
 
 _ZRV_END

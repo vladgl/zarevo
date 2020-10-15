@@ -9,8 +9,8 @@ public:
 	ArrayObject(const std::string& obj_label = "");
 	~ArrayObject();
 
-	void bind();
-	void release();
+	void bind() const;
+	void release() const;
 };
 
 _ZRV_END

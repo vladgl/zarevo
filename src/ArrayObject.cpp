@@ -14,12 +14,12 @@ ArrayObject::~ArrayObject()
 	glDeleteVertexArrays(1, &_object_name);
 }
 
-void ArrayObject::bind()
+void ArrayObject::bind() const
 {
 	glBindVertexArray(_object_name);
 }
 
-void ArrayObject::release()
+void ArrayObject::release() const
 {
 	glBindVertexArray(0);
 }

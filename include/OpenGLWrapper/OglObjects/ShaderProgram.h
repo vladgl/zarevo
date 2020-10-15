@@ -16,10 +16,10 @@ public:
 	bool link();
 
 
-	void use();
-	void release();
-	GLint getUnifLoc(const GLchar* name);
-	GLint getAttribLoc(const GLchar* name);
+	void use() const;
+	void release() const;
+	GLint getUnifLoc(const GLchar* name) const;
+	GLint getAttribLoc(const GLchar* name) const;
 
 	std::string getLog()
 	{

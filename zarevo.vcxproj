@@ -167,6 +167,9 @@
     <ClInclude Include="include\OpenGLWrapper\OglObjects\Shader.h" />
     <ClInclude Include="include\OpenGLWrapper\OglObjects\ShaderProgram.h" />
     <ClInclude Include="include\OpenGLWrapper\OglObjects\TextureObject.h" />
+    <ClInclude Include="include\OpenGLWrapper\OglWrapper.h" />
+    <ClInclude Include="include\SimpleMesh.h" />
+    <ClInclude Include="include\Window.h" />
     <ClInclude Include="include\zarevo.h" />
     <ClInclude Include="include\zarevo_base.h" />
     <ClInclude Include="include\zrv_logger.h" />
@@ -178,7 +181,9 @@
     <ClCompile Include="src\BufferObject.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\ShaderProgram.cpp" />
+    <ClCompile Include="src\SimpleMesh.cpp" />
     <ClCompile Include="src\TextureObject.cpp" />
+    <ClCompile Include="src\Window.cpp" />
     <ClCompile Include="src\zarevo_base.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

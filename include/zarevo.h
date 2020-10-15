@@ -1,13 +1,9 @@
 #pragma once
 #include "zarevo_base.h"
-
-#include "OpenGLWrapper/OglObjects/OglObject.h"
-#include "OpenGLWrapper/OglObjects/ArrayObject.h"
-#include "OpenGLWrapper/OglObjects/BufferObject.h"
-#include "OpenGLWrapper/OglObjects/Shader.h"
-#include "OpenGLWrapper/OglObjects/ShaderProgram.h"
-#include "OpenGLWrapper/Image2D.h";
-#include "OpenGLWrapper/OglObjects/TextureObject.h";
+#include "zrv_logger.h"
+#include "OpenGLWrapper/OglWrapper.h"
+#include "SimpleMesh.h"
+#include "Window.h"
 
 
 //todo

@@ -10,4 +10,4 @@
 
 #endif
 
-#include "OpenGLWrapper/OglBase.h"
+#include "OpenGLWrapper/OglWrapper.h"
