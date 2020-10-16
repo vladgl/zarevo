@@ -1,6 +1,9 @@
 #include "mWindow.h"
 #include <fstream>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 
 void mWindow::initGl()
@@ -32,10 +35,19 @@ void mWindow::initGl()
 		1, 2, 3
 	};
 
+
+
 	mesh.initMesh(vertices, indices, texCoord, "pic1");
+
+
+
 	if (!m_prog.init("base_sh.vert", "base_sh.frag"))
 	{
 		ZRV_LOG << m_prog.getLog();
+	}
+	for (auto& str : zrv::glErrorHandler())
+	{
+		ZRV_LOG << str << std::endl;
 	}
 }
 

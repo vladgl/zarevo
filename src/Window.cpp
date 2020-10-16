@@ -23,7 +23,7 @@ Window::Window(uint16_t w, uint16_t h, const char* title) :
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-	p_window = glfwCreateWindow(mode->width, mode->height, title, nullptr/* glfwGetPrimaryMonitor()*/, nullptr);
+	p_window = glfwCreateWindow(w, h, title, nullptr/* glfwGetPrimaryMonitor()*/, nullptr);
 	if (p_window == nullptr)
 	{
 //		std::cout << "Error: window cannot be created. Maybe your hardware don't support OpenGl 3.0" << std::endl;

@@ -1,5 +1,4 @@
 #include "../include/OpenGLWrapper/OglObjects/TextureObject.h"
-
 _ZRV_BEGIN
 
 TextureObject::TextureObject(TextureType type, const std::string& obj_label) :
@@ -158,7 +157,8 @@ void TextureObject::setMinFilter(TextureFilter tex_filter, MipmapFilter mip_filt
 			param = GL_NEAREST_MIPMAP_NEAREST;
 
 
-		glTexParameteri(_gl_type, GL_TEXTURE_MAG_FILTER, param);
+		glTexParameteri(_gl_type, GL_TEXTURE_MIN_FILTER, param);
+
 	}
 }
 

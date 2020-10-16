@@ -9,10 +9,12 @@
 layout(location = ATTR_POSITION) in vec3 position;
 layout(location = ATTR_TEXCOORD) in vec2 texCoord;
 
+uniform mat4 model;
+
 out vec2 tex_coord;
 
 void main()
 {
-    gl_Position = vec4( position, 1.0);  
+    gl_Position = model * vec4( position, 1.0);  
     tex_coord = texCoord;
 }

@@ -1,4 +1,7 @@
 #pragma once
+#ifdef _DEBUG && !defined(_ZRV_DEBUG)
+#define ZRV_DEBUG
+#endif
 #include <zarevo.h>
 
 class mWindow : public zrv::Window

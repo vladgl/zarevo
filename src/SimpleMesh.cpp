@@ -17,6 +17,7 @@ void SimpleMesh::initMesh(std::vector<GLfloat>& vertices,
 	std::vector<GLfloat>& texCoord,
 	const std::string& tex_path)
 {
+
 	_vertices = std::move(vertices);
 	_indices = std::move(indices);
 	_texCoord = std::move(texCoord);
@@ -26,14 +27,19 @@ void SimpleMesh::initMesh(std::vector<GLfloat>& vertices,
 	{
 		ZRV_LOG << "Image format is unsupported \n";
 	}
+
 	_texture.bind();
+
 	_texture.setImage(img.flipY());
+
 	_texture.setMinFilter(zrv::TextureObject::TextureFilter::Linear);
+
 	_texture.setMagFilter(zrv::TextureObject::TextureFilter::Linear);
 	_texture.setWrapping(zrv::TextureObject::Wrapping::Repeat);
 	_texture.generateMipmap();
 
 	_texture.release();
+
 	_array_object.bind();
 
 	_array_buffer.bind();
@@ -51,8 +57,8 @@ void SimpleMesh::initMesh(std::vector<GLfloat>& vertices,
 	_index_buffer.bind();
 	_index_buffer.allocate(_indices);
 
-
 	_array_object.release();
+
 }
 
 void SimpleMesh::drawMesh(const ShaderProgram& program)
