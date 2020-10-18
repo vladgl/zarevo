@@ -169,6 +169,7 @@
     <ClInclude Include="include\OpenGLWrapper\OglObjects\TextureObject.h" />
     <ClInclude Include="include\OpenGLWrapper\OglWrapper.h" />
     <ClInclude Include="include\SimpleMesh.h" />
+    <ClInclude Include="include\TargetCamera.h" />
     <ClInclude Include="include\Window.h" />
     <ClInclude Include="include\zarevo.h" />
     <ClInclude Include="include\zarevo_base.h" />
@@ -182,6 +183,7 @@
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\ShaderProgram.cpp" />
     <ClCompile Include="src\SimpleMesh.cpp" />
+    <ClCompile Include="src\TargetCamera.cpp" />
     <ClCompile Include="src\TextureObject.cpp" />
     <ClCompile Include="src\Window.cpp" />
     <ClCompile Include="src\zarevo_base.cpp" />

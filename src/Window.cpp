@@ -43,6 +43,7 @@ Window::Window(uint16_t w, uint16_t h, const char* title) :
 	initEventHandler(p_window);
 	glfwGetFramebufferSize(p_window, &_fw, &_fh);
 	glViewport(0, 0, _fw, _fh);
+	_aspect = _fw / float(_fh);
 
 	this->initGl();
 }

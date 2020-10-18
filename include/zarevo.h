@@ -3,6 +3,7 @@
 #include "zrv_logger.h"
 #include "OpenGLWrapper/OglWrapper.h"
 #include "SimpleMesh.h"
+#include "TargetCamera.h"
 #include "Window.h"
 
 

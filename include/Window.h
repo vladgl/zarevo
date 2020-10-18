@@ -89,6 +89,8 @@ protected:
 	GLFWwindow* p_window;
 	GLfloat _frame_interval, _cur_time;
 	int _ww, _wh, _fw, _fh;
+	float _aspect;
+
 private:
 	Window() = delete;
 	Window(Window&) = delete;

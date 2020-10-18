@@ -2,23 +2,52 @@
 #ifdef _DEBUG && !defined(_ZRV_DEBUG)
 #define ZRV_DEBUG
 #endif
+
+#ifndef PROJECTION_STATES
+#define PROJECTION_STATES void initProjectionFunctions(); std::map<Projection, ResizeFunc> _projection_map;
+#define PROJECTION_CALL(TYPE) _projection_map[TYPE]();
+#define INIT_PROJECTION_FUNC this->initProjectionFunctions();
+#define _INIT_PROJECTION_FUNC_BEGIN void mWindow::initProjectionFunctions() {
+#define _INIT_PROJECTION_FUNC_END }
+#define PROJECTION_MAP_BEGIN(TYPE) _projection_map[TYPE] = [this]() {
+#define PROJECTION_MAP_END };
+#endif
+
 #include <zarevo.h>
+#include <functional>
+#include <map>
+
+typedef std::function<void()> ResizeFunc;
+
+struct MouseParam
+{
+	float sensivity;
+	glm::dvec2 pos;
+};
 
 class mWindow : public zrv::Window
 {
 public:
+	enum class Projection { Perspective, Ortho };
 	mWindow(uint16_t w, uint16_t h, const char* title): 
 		zrv::Window(w, h, title),
 		m_prog("myShader"),
 		mesh("myMesh")
 
 	{
+		_proj = Projection::Perspective;
+		INIT_PROJECTION_FUNC
 		initGl();
-		sensivity = 0.005f;
+		glm::vec3 temp = _cam.eye() - _cam.target();
+		xy_offset = glm::asin(temp.z / glm::length(temp));
+		xz_offset = glm::atan(temp.y / temp.x );
+		mouse.sensivity = 0.005f;
 		_scroll_coeff = 1.1f;
 		glfwSetCursorPos(p_window, _ww / 2.0, _wh / 2.0);
-		glfwGetCursorPos(p_window, &x_prev, &y_prev);
+		glfwGetCursorPos(p_window, &mouse.pos.x, &mouse.pos.y);
 	}
+
+
 
 	void initGl() override;
 	void paintGl() override;
@@ -28,22 +57,32 @@ public:
 	void mouseButtonEvent(int button, int action, int mods) override;
 	void scrollEvent(double xoffset, double yoffset)        override;
 
+
+
 //	void drawModel(zrv::ShaderProgram* program, zrv::MeshModel* mm) override;
 
 	enum MouseMoveState { DRAG, ROTATE };
 
 private:
+	PROJECTION_STATES
 	zrv::ShaderProgram m_prog;
 	zrv::SimpleMesh mesh;
 
 	GLfloat cutOff;
 	GLfloat outerCutOff;
 
-	double sensivity, x_prev, y_prev, x_offset, y_offset;
+	double xy_offset, xz_offset;
 	double _scroll_coeff;
 	MouseMoveState mouse_move_state;
 	GLfloat _prev_pos_x, _prev_pos_y;
 
 	GLuint spec_tex, emis_tex;
 	int t_w, t_h, e_t_w, e_t_h;
+
+	Projection _proj;
+
+	zrv::TargetCamera _cam;
+	MouseParam mouse;
+//	std::map<Projection, ResizeFunc> _projection_map;
+
 };

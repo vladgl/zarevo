@@ -11,5 +11,7 @@ uniform sampler2D tex_img;
 
 void main()
 {
+
     color = texture(tex_img, tex_coord);//0.5 * (1.1 *  result_tex   + 0.8 * vec4(user_color, 1.0)) ;
+
 }
