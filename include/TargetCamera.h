@@ -15,15 +15,19 @@ public:
 	void setEyeV(const glm::vec3& eye);
 	void setTargerV(const glm::vec3& target);
 	void setUpV(const glm::vec3& up);
-	glm::vec3 rotateEyeAroundZ(float xy_angle, float xz_angle);
+	void setFov(float new_fov);
+	glm::vec3 rotateAroundTarget(double xy_angle, double xz_angle);
 
 	glm::vec3 eye();
 	glm::vec3 target();
 	glm::vec3 up();
+	float fov();
 
 private:
+	void recalcOffsets();
 	glm::vec3 _eye, _target, _up;
-	float _length;
+	float _length, _fov;
+	double xy_offset, xz_offset;
 	std::string _label;
 };
 

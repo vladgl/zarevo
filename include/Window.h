@@ -87,7 +87,7 @@ protected:
 	virtual void initGl() {};
 //	virtual void drawModel(zrv::ShaderProgram* program, zrv::MeshModel* mm) {};
 	GLFWwindow* p_window;
-	GLfloat _frame_interval, _cur_time;
+	double _frame_interval, _cur_time;
 	int _ww, _wh, _fw, _fh;
 	float _aspect;
 

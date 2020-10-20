@@ -19,7 +19,7 @@ PROJECTION_MAP_BEGIN(Projection::Perspective)
 
 _aspect = _fw / float(_fh);
 glm::mat4 projection{ 1.0f };
-projection = glm::perspective(glm::radians(80.0f), _aspect, 0.01f, 100.0f);
+projection = glm::perspective(_cam.fov(), _aspect, 0.01f, 100.0f);
 m_prog.use();
 GLint proj_pos = m_prog.getUnifLoc("projection");
 glUniformMatrix4fv(proj_pos, 1, GL_FALSE, glm::value_ptr(projection));

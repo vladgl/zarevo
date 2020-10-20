@@ -13,6 +13,7 @@ Window::Window(uint16_t w, uint16_t h, const char* title) :
 	glfwInit();
 
 	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+//	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 	glfwWindowHint(GLFW_RED_BITS, mode->redBits);
 	glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
 	glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
@@ -26,8 +27,8 @@ Window::Window(uint16_t w, uint16_t h, const char* title) :
 	p_window = glfwCreateWindow(w, h, title, nullptr/* glfwGetPrimaryMonitor()*/, nullptr);
 	if (p_window == nullptr)
 	{
-//		std::cout << "Error: window cannot be created. Maybe your hardware don't support OpenGl 3.0" << std::endl;
-//		getchar();
+		std::cout << "Error: window cannot be created. Maybe your hardware don't support OpenGl ES 2.0" << std::endl;
+		getchar();
 		exit(-1);
 	}
 	glfwMakeContextCurrent(p_window);

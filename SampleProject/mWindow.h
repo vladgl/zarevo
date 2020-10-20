@@ -32,19 +32,21 @@ public:
 	mWindow(uint16_t w, uint16_t h, const char* title): 
 		zrv::Window(w, h, title),
 		m_prog("myShader"),
-		mesh("myMesh")
+		mesh("myMesh"),
+		key_pressed_time{ 0.4 }
 
 	{
 		_proj = Projection::Perspective;
 		INIT_PROJECTION_FUNC
 		initGl();
-		glm::vec3 temp = _cam.eye() - _cam.target();
-		xy_offset = glm::asin(temp.z / glm::length(temp));
-		xz_offset = glm::atan(temp.y / temp.x );
-		mouse.sensivity = 0.005f;
+		mouse.sensivity = 2.0f;
 		_scroll_coeff = 1.1f;
 		glfwSetCursorPos(p_window, _ww / 2.0, _wh / 2.0);
 		glfwGetCursorPos(p_window, &mouse.pos.x, &mouse.pos.y);
+
+#ifdef _DEBUG
+		sleep = 0.0;
+#endif
 	}
 
 
@@ -71,7 +73,6 @@ private:
 	GLfloat cutOff;
 	GLfloat outerCutOff;
 
-	double xy_offset, xz_offset;
 	double _scroll_coeff;
 	MouseMoveState mouse_move_state;
 	GLfloat _prev_pos_x, _prev_pos_y;
@@ -84,5 +85,9 @@ private:
 	zrv::TargetCamera _cam;
 	MouseParam mouse;
 //	std::map<Projection, ResizeFunc> _projection_map;
-
+#ifdef _DEBUG
+	double sleep;
+	
+#endif
+	double key_pressed_time[1024];
 };

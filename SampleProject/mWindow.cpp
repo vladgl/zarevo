@@ -1,5 +1,7 @@
 #include "mWindow.h"
+#include <Windows.h>
 #include <fstream>
+#include <algorithm>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -72,6 +74,9 @@ void mWindow::initGl()
 
 void mWindow::paintGl()
 {
+#ifdef _DEBUG
+	Sleep(sleep * 1000.0);
+#endif
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//mesh.useColor();
     //mesh.useTexture();
@@ -91,6 +96,18 @@ void mWindow::keyEvent(int key, int scancode, int action, int mode)
 		_proj = Projection::Perspective;
 		PROJECTION_CALL(Projection::Perspective)
 	}
+#ifdef _DEBUG
+	if (key == GLFW_KEY_F5 && glfwGetTime() - key_pressed_time[GLFW_KEY_F5] > 0.5 && action == GLFW_PRESS && sleep > 0.1)
+	{
+		sleep -= 0.1;
+		key_pressed_time[GLFW_KEY_F5] = glfwGetTime();
+	}
+	if (key == GLFW_KEY_F6 && glfwGetTime() - key_pressed_time[GLFW_KEY_F6] > 0.5 && action == GLFW_PRESS)
+	{
+		sleep += 0.1;
+		key_pressed_time[GLFW_KEY_F6] = glfwGetTime();
+	}
+#endif
 }
 
 void mWindow::resizeEvent(int width, int height)
@@ -102,21 +119,12 @@ void mWindow::resizeEvent(int width, int height)
 void mWindow::mouseMoveEvent(double xpos, double ypos)
 {
 	double dx = xpos - mouse.pos.x;
-	double dy = - ypos + mouse.pos.y;
+	double dy = ypos - mouse.pos.y;
 	mouse.pos.x = xpos;
 	mouse.pos.y = ypos;
 	if (glfwGetMouseButton(p_window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 	{
-		xy_offset -= dy * mouse.sensivity; 
-		xz_offset = glm::mod(xz_offset + dx * mouse.sensivity, (double)glm::radians(360.0f));
-
-		if (xy_offset > glm::radians(89.0))
-			xy_offset = glm::radians(89.0);
-		if (xy_offset < glm::radians(-89.0))
-			xy_offset = glm::radians(-89.0);
-
-		_cam.rotateEyeAroundZ(xy_offset, xz_offset);
-
+		_cam.rotateAroundTarget(dy * mouse.sensivity / _fh, dx * mouse.sensivity / _fw);
 		m_prog.use();
 		GLint pos = m_prog.getUnifLoc("view");
 		glUniformMatrix4fv(pos, 1, GL_FALSE, glm::value_ptr(_cam.getViewMatrix()));
