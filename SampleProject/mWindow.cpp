@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 
 void mWindow::initGl()
@@ -42,12 +43,11 @@ void mWindow::initGl()
 	mesh.initMesh(vertices, indices, texCoord, "pic1");
 
 
-
 	if (!m_prog.init("base_sh.vert", "base_sh.frag"))
 	{
 		ZRV_LOG << m_prog.getLog();
 	}
-	glEnable(GL_CULL_FACE);
+//	glEnable(GL_CULL_FACE);
 	glm::mat4 model{ 1.0f }, view{ 1.0f }, projection{ 1.0f };
 
 //	model = glm::translate(model, glm::vec3(.3f, 0.0f, 0.0f));
@@ -78,10 +78,26 @@ void mWindow::paintGl()
 	Sleep(sleep * 1000.0);
 #endif
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	if (_draw_backface_as_wireframe_flag)
+	{
+		glEnable(GL_CULL_FACE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glCullFace(GL_BACK);
+		mesh.drawMesh(m_prog);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glCullFace(GL_FRONT);
+		mesh.drawMesh(m_prog);
+	}
+	else
+	{
+		glDisable(GL_CULL_FACE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		mesh.drawMesh(m_prog);
+	}
+
 	//mesh.useColor();
     //mesh.useTexture();
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	mesh.drawMesh(m_prog);
 }
 
 void mWindow::keyEvent(int key, int scancode, int action, int mode)
@@ -95,6 +111,10 @@ void mWindow::keyEvent(int key, int scancode, int action, int mode)
 	{
 		_proj = Projection::Perspective;
 		PROJECTION_CALL(Projection::Perspective)
+	}
+	if (key == GLFW_KEY_B && action == GLFW_PRESS)
+	{
+		_draw_backface_as_wireframe_flag = !_draw_backface_as_wireframe_flag;
 	}
 #ifdef _DEBUG
 	if (key == GLFW_KEY_F5 && glfwGetTime() - key_pressed_time[GLFW_KEY_F5] > 0.5 && action == GLFW_PRESS && sleep > 0.1)
@@ -122,9 +142,10 @@ void mWindow::mouseMoveEvent(double xpos, double ypos)
 	double dy = ypos - mouse.pos.y;
 	mouse.pos.x = xpos;
 	mouse.pos.y = ypos;
+
 	if (glfwGetMouseButton(p_window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 	{
-		_cam.rotateAroundTarget(dy * mouse.sensivity / _fh, dx * mouse.sensivity / _fw);
+		_cam.rotateAroundTarget(dy * mouse.sensivity / _fh, -dx * mouse.sensivity / _fw);
 		m_prog.use();
 		GLint pos = m_prog.getUnifLoc("view");
 		glUniformMatrix4fv(pos, 1, GL_FALSE, glm::value_ptr(_cam.getViewMatrix()));
@@ -137,4 +158,11 @@ void mWindow::mouseButtonEvent(int button, int action, int mods)
 }
 void mWindow::scrollEvent(double xoffset, double yoffset)
 {
+	float fov = _cam.fov() + glm::radians(-yoffset * 5.0f);
+	if (fov < glm::radians(0.1f))
+		fov = glm::radians(0.1f);
+	if (fov > glm::radians(179.9f))
+		fov = glm::radians(179.9f);
+	_cam.setFov(fov);
+	PROJECTION_CALL(_proj);
 }

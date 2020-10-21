@@ -3,8 +3,14 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 _ZRV_BEGIN
 
+class ICameraStrategy
+{
+	
+};
 class TargetCamera
 {
 public:
@@ -25,7 +31,9 @@ public:
 
 private:
 	void recalcOffsets();
-	glm::vec3 _eye, _target, _up;
+	void recalcUpVec();
+	glm::vec3 _eye, _target, _up, _right;
+	glm::quat _rotation;
 	float _length, _fov;
 	double xy_offset, xz_offset;
 	std::string _label;
