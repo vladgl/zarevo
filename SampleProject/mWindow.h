@@ -39,11 +39,12 @@ public:
 		_proj = Projection::Perspective;
 		INIT_PROJECTION_FUNC
 		initGl();
-		mouse.sensivity = 4.0f;
+		mouse.sensivity = 8.0f;
 		_scroll_coeff = 1.1f;
 		glfwSetCursorPos(p_window, _ww / 2.0, _wh / 2.0);
 		glfwGetCursorPos(p_window, &mouse.pos.x, &mouse.pos.y);
-		_draw_backface_as_wireframe_flag = false;
+		_draw_backface_as_wireframe_flag = true;
+		_roll_flag = false;
 
 #ifdef _DEBUG
 		sleep = 0.0;
@@ -86,6 +87,7 @@ private:
 	zrv::TargetCamera _cam;
 	MouseParam mouse;
 	bool _draw_backface_as_wireframe_flag;
+	bool _roll_flag;
 //	std::map<Projection, ResizeFunc> _projection_map;
 #ifdef _DEBUG
 	double sleep;

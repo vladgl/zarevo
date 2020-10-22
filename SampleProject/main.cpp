@@ -9,7 +9,7 @@ using namespace std;
 int main()
 {
 	ZRV_LOG << "Proj started\n";
-	mWindow wnd(500, 400, "Sample Project");
+	mWindow wnd(1000, 800, "Sample Project");
 	return wnd.exec();
 
 }

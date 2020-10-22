@@ -104,7 +104,7 @@ void BufferObject::subData(GLuint offset, const std::vector<T>& data)
 }
 
 
-// explicit template definitions for common OpenGL types
+// explicit template instantiations for common OpenGL types
 
 template void BufferObject::allocate<GLboolean> (const std::vector<GLboolean>& data, DrawMode mode);
 template void BufferObject::allocate<GLbitfield>(const std::vector<GLbitfield>& data, DrawMode mode);

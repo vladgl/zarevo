@@ -1,5 +1,6 @@
 #include "../include/SimpleMesh.h"
 #include "../include/zrv_logger.h"
+
 _ZRV_SOURCE
 
 SimpleMesh::SimpleMesh(const std::string& label)	:
@@ -74,3 +75,12 @@ void SimpleMesh::drawMesh(const ShaderProgram& program)
 
 	program.release();
 }
+
+void SimpleMesh::loadFromFile(const std::string& path)
+{
+//	Assimp::Importer importer;
+//	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+
+
+}
+

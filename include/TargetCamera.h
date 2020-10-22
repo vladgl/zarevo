@@ -22,7 +22,7 @@ public:
 	void setTargerV(const glm::vec3& target);
 	void setUpV(const glm::vec3& up);
 	void setFov(float new_fov);
-	glm::vec3 rotateAroundTarget(double xy_angle, double xz_angle);
+	glm::vec3 rotateAroundCenter(double xz_angle, double xy_angle, double roll);
 
 	glm::vec3 eye();
 	glm::vec3 target();
@@ -32,10 +32,10 @@ public:
 private:
 	void recalcOffsets();
 	void recalcUpVec();
-	glm::vec3 _eye, _target, _up, _right;
-	glm::quat _rotation;
+	glm::vec3 _eye, _center, _up, _right;
+	glm::quat _rotation, _up_rot;
 	float _length, _fov;
-	double xy_offset, xz_offset;
+	double xy_offset, xz_offset, _roll;
 	std::string _label;
 };
 

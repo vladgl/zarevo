@@ -12,6 +12,7 @@ struct SimpleMesh
 		std::vector<GLfloat>& texCoord,
 		const std::string& tex_path);
 	void drawMesh(const ShaderProgram& program);
+	void loadFromFile(const std::string& path);
 	std::vector<GLfloat> _vertices;
 	std::vector<GLfloat> _texCoord;
 	std::vector<GLuint> _indices;

@@ -116,6 +116,14 @@ void mWindow::keyEvent(int key, int scancode, int action, int mode)
 	{
 		_draw_backface_as_wireframe_flag = !_draw_backface_as_wireframe_flag;
 	}
+	if (key == GLFW_KEY_LEFT_ALT && action == GLFW_PRESS)
+	{
+		_roll_flag = true;
+	}
+	if (key == GLFW_KEY_LEFT_ALT && action == GLFW_RELEASE)
+	{
+		_roll_flag = false;
+	}
 #ifdef _DEBUG
 	if (key == GLFW_KEY_F5 && glfwGetTime() - key_pressed_time[GLFW_KEY_F5] > 0.5 && action == GLFW_PRESS && sleep > 0.1)
 	{
@@ -145,7 +153,21 @@ void mWindow::mouseMoveEvent(double xpos, double ypos)
 
 	if (glfwGetMouseButton(p_window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 	{
-		_cam.rotateAroundTarget(dy * mouse.sensivity / _fh, -dx * mouse.sensivity / _fw);
+		if (_roll_flag)
+		{
+			if (xpos < _fw / 2.0)
+			{
+				_cam.rotateAroundCenter(0.0, 0.0, -dy * mouse.sensivity / _fh);
+			}
+			else
+			{
+				_cam.rotateAroundCenter(0.0, 0.0, dy * mouse.sensivity / _fh);
+			}
+		}
+		else
+		{
+			_cam.rotateAroundCenter(-dx * mouse.sensivity / _fw, dy * mouse.sensivity / _fh, 0.0);
+		}
 		m_prog.use();
 		GLint pos = m_prog.getUnifLoc("view");
 		glUniformMatrix4fv(pos, 1, GL_FALSE, glm::value_ptr(_cam.getViewMatrix()));
