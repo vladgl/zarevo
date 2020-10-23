@@ -45,6 +45,8 @@ public:
 		glfwGetCursorPos(p_window, &mouse.pos.x, &mouse.pos.y);
 		_draw_backface_as_wireframe_flag = true;
 		_roll_flag = false;
+		_strafe_flag = false;
+		_mod_shift = false;
 
 #ifdef _DEBUG
 		sleep = 0.0;
@@ -87,7 +89,9 @@ private:
 	zrv::TargetCamera _cam;
 	MouseParam mouse;
 	bool _draw_backface_as_wireframe_flag;
-	bool _roll_flag;
+	bool _roll_flag, _strafe_flag;
+
+	bool _mod_shift;
 //	std::map<Projection, ResizeFunc> _projection_map;
 #ifdef _DEBUG
 	double sleep;

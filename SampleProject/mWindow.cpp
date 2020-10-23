@@ -102,6 +102,8 @@ void mWindow::paintGl()
 
 void mWindow::keyEvent(int key, int scancode, int action, int mode)
 {
+	_mod_shift = (mode == GLFW_MOD_SHIFT);
+
 	if (key == GLFW_KEY_O && action == GLFW_PRESS)
 	{
 		_proj = Projection::Ortho;
@@ -157,17 +159,27 @@ void mWindow::mouseMoveEvent(double xpos, double ypos)
 		{
 			if (xpos < _fw / 2.0)
 			{
-				_cam.rotateAroundCenter(0.0, 0.0, -dy * mouse.sensivity / _fh);
+				_cam.rollUpV(dy * mouse.sensivity / _fh);
 			}
 			else
 			{
-				_cam.rotateAroundCenter(0.0, 0.0, dy * mouse.sensivity / _fh);
+				_cam.rollUpV(-dy * mouse.sensivity / _fh);
 			}
 		}
 		else
 		{
-			_cam.rotateAroundCenter(-dx * mouse.sensivity / _fw, dy * mouse.sensivity / _fh, 0.0);
+			_cam.rotateAroundUpV(-dx * mouse.sensivity / _fw, dy * mouse.sensivity / _fh);
 		}
+		m_prog.use();
+		GLint pos = m_prog.getUnifLoc("view");
+		glUniformMatrix4fv(pos, 1, GL_FALSE, glm::value_ptr(_cam.getViewMatrix()));
+		m_prog.release();
+	}
+
+	if (glfwGetMouseButton(p_window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+	{
+		double pan_coef = 2.0 * double(_cam.length()) * glm::tan(_cam.fov() / 2.0) / std::min<float>(_fw, _fh);
+		_cam.parallelOffset(-dx * pan_coef, dy * pan_coef);
 		m_prog.use();
 		GLint pos = m_prog.getUnifLoc("view");
 		glUniformMatrix4fv(pos, 1, GL_FALSE, glm::value_ptr(_cam.getViewMatrix()));
@@ -180,11 +192,26 @@ void mWindow::mouseButtonEvent(int button, int action, int mods)
 }
 void mWindow::scrollEvent(double xoffset, double yoffset)
 {
-	float fov = _cam.fov() + glm::radians(-yoffset * 5.0f);
-	if (fov < glm::radians(0.1f))
-		fov = glm::radians(0.1f);
-	if (fov > glm::radians(179.9f))
-		fov = glm::radians(179.9f);
-	_cam.setFov(fov);
-	PROJECTION_CALL(_proj);
+	if (glfwGetKey(p_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+	{
+		float fov = _cam.fov() + glm::radians(-yoffset * 5.0f);
+		if (fov < glm::radians(0.1f))
+			fov = glm::radians(0.1f);
+		if (fov > glm::radians(179.9f))
+			fov = glm::radians(179.9f);
+		_cam.setFov(fov);
+		PROJECTION_CALL(_proj);
+	}
+	else
+	{
+		if (yoffset > 0.0)
+			_cam.dirOffset(1 / 1.1);
+		if (yoffset < 0.0)
+			_cam.dirOffset(1.1);
+		PROJECTION_CALL(_proj);
+		m_prog.use();
+		GLint pos = m_prog.getUnifLoc("view");
+		glUniformMatrix4fv(pos, 1, GL_FALSE, glm::value_ptr(_cam.getViewMatrix()));
+		m_prog.release();
+	}
 }
