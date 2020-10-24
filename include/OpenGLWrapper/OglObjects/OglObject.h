@@ -4,7 +4,7 @@ _ZRV_BEGIN
 class OGL_OBJECT
 {
 public:
-	OGL_OBJECT(const std::string obj_label = "") :
+	OGL_OBJECT(const std::string& obj_label = "") :
 		_label(obj_label), _object_name(0)
 	{
 
