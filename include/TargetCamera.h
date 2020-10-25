@@ -1,22 +1,17 @@
 #pragma once
 #include "zarevo_base.h"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/quaternion.hpp>
+#include "BBox.h"
 
 _ZRV_BEGIN
 
-class ICameraStrategy
-{
-	
-};
 class TargetCamera
 {
 public:
 	TargetCamera();
 	TargetCamera(glm::vec3 eye, glm::vec3 target, glm::vec3 up, const std::string& label = "");
 	glm::mat4 getViewMatrix();
+	glm::mat4 getRotationMatrix();
+	void applyTransform();
 
 	void setEyeV(const glm::vec3& eye);
 	void setTargerV(const glm::vec3& target);
@@ -26,6 +21,7 @@ public:
 	void rollUpV(double roll);
 	void parallelOffset(double right, double up);
 	void dirOffset(double offset);
+	void fitInView(const AxisAlignedBB& bbox);
 
 	glm::vec3 eye();
 	glm::vec3 target();
@@ -34,10 +30,10 @@ public:
 	float length();
 
 private:
-	void recalcOffsets();
+	void resetVectorsGS();
 	glm::vec3 _eye, _center;
 	glm::vec3 _up, _direction, _right, _rolled_up, _dpos;
-	glm::quat _rotation, _roll_rot;
+	glm::quat _rotation, _roll_rot, _pitch_yaw_rot;
 	float _fov;
 	double _pitch, _yaw, _roll, _dir_offset;
 	std::string _label;

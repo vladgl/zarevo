@@ -8,8 +8,9 @@ SimpleMesh::SimpleMesh(const std::string& label)	:
 	_array_buffer(zrv::BufferObject::BufferType::Array, label),
 	_texcoord_buffer(zrv::BufferObject::BufferType::Array, label + "tex_coord"),
 	_index_buffer(zrv::BufferObject::BufferType::ElementArray, label),
-	_texture(zrv::TextureObject::TextureType::Texture2D, label)
-
+	_texture(zrv::TextureObject::TextureType::Texture2D, label),
+	_model_matrix{ 1.0f },
+	_bbox{}
 {
 }
 
@@ -22,6 +23,8 @@ void SimpleMesh::initMesh(std::vector<GLfloat>& vertices,
 	_vertices = std::move(vertices);
 	_indices = std::move(indices);
 	_texCoord = std::move(texCoord);
+
+	_bbox.createBbox(*this);
 
 	Image2D img{ tex_path };
 	if (img.format() == Image2D::Format::UNSUPPORTED)
@@ -65,6 +68,8 @@ void SimpleMesh::initMesh(std::vector<GLfloat>& vertices,
 void SimpleMesh::drawMesh(const ShaderProgram& program)
 {
 	program.use();
+
+	glUniformMatrix4fv(program.getUnifLoc("zrv_UModel"), 1, GL_FALSE, glm::value_ptr(_model_matrix));
 
 	_array_object.bind();
 

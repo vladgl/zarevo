@@ -40,7 +40,7 @@ void mWindow::initGl()
 
 
 
-	mesh.initMesh(vertices, indices, texCoord, "pic1");
+	mesh.initMesh(vertices, indices, texCoord, "zx.png");
 
 
 	if (!m_prog.init("base_sh.vert", "base_sh.frag"))
@@ -55,12 +55,11 @@ void mWindow::initGl()
 	PROJECTION_CALL(Projection::Perspective)
 	m_prog.use();
 
-	GLint model_pos = m_prog.getUnifLoc("model");
+	GLint model_pos = m_prog.getUnifLoc("zrv_UModel");
 	GLint view_pos = m_prog.getUnifLoc("view");
 	GLint proj_pos = m_prog.getUnifLoc("projection");
-	ZRV_LOG << model_pos << view_pos << proj_pos;
 
-	glUniformMatrix4fv(model_pos, 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(model_pos, 1, GL_FALSE, glm::value_ptr(mesh._model_matrix));
 	glUniformMatrix4fv(view_pos, 1, GL_FALSE, glm::value_ptr(_cam.getViewMatrix()));
 
 	m_prog.release();
@@ -78,6 +77,7 @@ void mWindow::paintGl()
 	Sleep(sleep * 1000.0);
 #endif
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 
 	if (_draw_backface_as_wireframe_flag)
 	{
@@ -126,6 +126,16 @@ void mWindow::keyEvent(int key, int scancode, int action, int mode)
 	{
 		_roll_flag = false;
 	}
+
+	if (key == GLFW_KEY_Z && action == GLFW_PRESS)
+	{
+		_cam.fitInView(mesh._bbox);
+		m_prog.use();
+		GLint pos = m_prog.getUnifLoc("view");
+		glUniformMatrix4fv(pos, 1, GL_FALSE, glm::value_ptr(_cam.getViewMatrix()));
+		m_prog.release();
+	}
+
 #ifdef _DEBUG
 	if (key == GLFW_KEY_F5 && glfwGetTime() - key_pressed_time[GLFW_KEY_F5] > 0.5 && action == GLFW_PRESS && sleep > 0.1)
 	{
@@ -155,20 +165,21 @@ void mWindow::mouseMoveEvent(double xpos, double ypos)
 
 	if (glfwGetMouseButton(p_window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 	{
+		//std::cout << __func__;
 		if (_roll_flag)
 		{
 			if (xpos < _fw / 2.0)
 			{
-				_cam.rollUpV(dy * mouse.sensivity / _fh);
+				_cam.rollUpV(-dy * mouse.sensivity / _fh);
 			}
 			else
 			{
-				_cam.rollUpV(-dy * mouse.sensivity / _fh);
+				_cam.rollUpV(+dy * mouse.sensivity / _fh);
 			}
 		}
 		else
 		{
-			_cam.rotateAroundUpV(-dx * mouse.sensivity / _fw, dy * mouse.sensivity / _fh);
+			_cam.rotateAroundUpV(dx * mouse.sensivity / _fw, dy * mouse.sensivity / _fh);
 		}
 		m_prog.use();
 		GLint pos = m_prog.getUnifLoc("view");
