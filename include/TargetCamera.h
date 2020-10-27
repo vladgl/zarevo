@@ -20,7 +20,7 @@ public:
 /*! \brief Returns rotation part of view matrix
 *   \return 3x3 rotation matrix
 */
-	glm::mat4 getRotationMatrix();
+	glm::mat3 getRotationMatrix();
 
 	void setEyeV(const glm::vec3& eye);
 	void setTargerV(const glm::vec3& target);

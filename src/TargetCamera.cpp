@@ -26,7 +26,7 @@ void TargetCamera::resetVectorsGS()
 	_rolled_up = _up;
 }
 
-glm::mat4 TargetCamera::getRotationMatrix()
+glm::mat3 TargetCamera::getRotationMatrix()
 {
 	return glm::mat3(getViewMatrix());
 }
@@ -69,11 +69,9 @@ void TargetCamera::rotateAroundUpV(double yaw, double pitch)
 
 void TargetCamera::rollUpV(double roll)
 {
-	glm::mat4 view = getViewMatrix();
-	glm::vec3 direction = _direction ;
-	_rolled_up = _rolled_up * glm::angleAxis(float(roll), direction);
-	_up = _up * glm::angleAxis(float(roll), direction);
-	_right = _right * glm::angleAxis(float(roll), direction);
+	_rolled_up = _rolled_up * glm::angleAxis(float(roll), _direction);
+	_up = _up * glm::angleAxis(float(roll), _direction);
+	_right = _right * glm::angleAxis(float(roll), _direction);
 }
 
 
