@@ -2,44 +2,41 @@
 #include <iostream>
 _ZRV_SOURCE
 
+
+
+/*! \brief Returns transition matrix to {x, y, z} coordinate system with center in p;
+*note that triple {x, y, z} should be normalized and orthogonal 
+*/
+glm::mat4 transitionMatrix(const glm::vec3& x, const glm::vec3& y, const glm::vec3& z, const glm::vec3& p);
+
+// Just an operator overload to print glm::vec3
 std::ostream& operator<< (std::ostream& out, glm::vec3 vec)
 {
 	out << vec.x << " " << vec.y << " " << vec.z;
 	return out;
 }
 
+
 void TargetCamera::resetVectorsGS()
 {
-	//Gram–Schmidt process
-	_direction = glm::normalize(_center - _eye);
+	_direction = glm::normalize(_direction);
 	_right = glm::normalize(glm::cross(_direction, _up));
 	_up = _up - glm::dot(_up, _direction) / glm::dot(_direction, _direction) * _direction;
 	_up = glm::normalize(_up);
-	//
 	_rolled_up = _up;
 }
 
 glm::mat4 TargetCamera::getRotationMatrix()
 {
-	return glm::mat4_cast(_rotation);
+	return glm::mat3(getViewMatrix());
 }
-void TargetCamera::applyTransform()
-{
 
-}
 
 TargetCamera::TargetCamera() :
-	_eye(0.0f, -1.0f, 0.0f), _center(2.0f, 1.0f, 0.0f), _up(0.0f, 0.0f, 1.0f), _label(""), _fov(glm::radians(80.0f))
+	_eye(0.0f, -1.0f, 0.0f), _center(0.0f, 0.0f, 0.0f), _up(0.0f, 0.0f, 1.0f), _label(""), _fov(glm::radians(80.0f))
 {
-	_yaw = 0.0;
-	_pitch = 0.0;
-	_roll = 0.0;
-
+	_direction = glm::normalize(_center - _eye); 
 	resetVectorsGS();
-
-	//identity quaternions
-	_rotation = glm::quat({0.0f, 0.0f, 0.0f});
-	_roll_rot = glm::quat({ 0.0f, 0.0f, 0.0f });
 	_dpos = glm::vec3(0.0f, 0.0f, 0.0f);
 	_dir_offset = 1.0;
 }
@@ -47,84 +44,46 @@ TargetCamera::TargetCamera() :
 TargetCamera::TargetCamera(glm::vec3 eye, glm::vec3 target, glm::vec3 up, const std::string& label) :
 	_eye(eye), _center(target), _up(glm::normalize(up)), _label(label), _fov(glm::radians(80.0f))
 {	
-	_yaw = 0.0;
-	_pitch = 0.0;
-	_roll = 0.0;
-
+	_direction = glm::normalize(_center - _eye);
 	resetVectorsGS();
-
-	//identity quaternions
-	_rotation = glm::quat({ 0.0f, 0.0f, 0.0f });
-	_roll_rot = glm::quat({ 0.0f, 0.0f, 0.0f });
-
 	_dpos = glm::vec3(0.0f, 0.0f, 0.0f);
 	_dir_offset = 1.0;
 }
 
 
-glm::mat4 TargetCamera::rotateAroundUpV(double yaw, double pitch)
+void TargetCamera::rotateAroundUpV(double yaw, double pitch)
 {
-	_pitch = glm::mod(_pitch + pitch, glm::radians(360.0));
-
+	float r_yaw = yaw;
 	// if camera is upside down we inverse yaw
-	if (_pitch > glm::radians(89.9) && _pitch < glm::radians(271.1))
+	if (glm::dot(_up, _rolled_up) < 0.0f)
 	{
-		_yaw = glm::mod(_yaw - yaw, glm::radians(360.0));
+		r_yaw = -yaw;
 	}
-	else
-	{
-		_yaw = glm::mod(_yaw + yaw, glm::radians(360.0));
-	}
+	_direction = _direction * glm::angleAxis(float(r_yaw), _rolled_up);
+	_up = _up * glm::angleAxis(float(r_yaw), _rolled_up);
+	_right = glm::cross(_direction, _up);
 
-	glm::quat R_d = glm::angleAxis(float(_roll), _direction);
-	glm::quat R_u = glm::angleAxis(float(_yaw), _up);
-	glm::quat R_r = glm::angleAxis(float(_pitch), _right);
+	_up = _up * glm::angleAxis(float(pitch), _right);
+	_direction = _direction * glm::angleAxis(float(pitch), _right);
+}
 
-	_rotation = R_d * R_r * R_u;
-
-	return glm::mat4_cast(_rotation);
+void TargetCamera::rollUpV(double roll)
+{
+	glm::mat4 view = getViewMatrix();
+	glm::vec3 direction = _direction ;
+	_rolled_up = _rolled_up * glm::angleAxis(float(roll), direction);
+	_up = _up * glm::angleAxis(float(roll), direction);
+	_right = _right * glm::angleAxis(float(roll), direction);
 }
 
 
 glm::mat4 TargetCamera::getViewMatrix()
 {
-	glm::vec3 direction = float(_dir_offset) * (_center - _eye) * _rotation;
-	glm::vec3 center = _center;
-	glm::vec3 eye = center - direction;
+	glm::vec3 eye = _center - _direction * float(_dir_offset);
 	glm::mat4 view{ 1.0f };
 
-	if (_pitch > glm::radians(89.99) && _pitch < glm::radians(270.01))
-		view = glm::lookAt(eye, center, -_rolled_up);
-	else
-		view = glm::lookAt(eye, center, _rolled_up);
-
+	view = transitionMatrix(_right, _up, -_direction, eye);
 	return  glm::translate(view, _dpos);
-}
-
-
-void TargetCamera::rollUpV(double roll)
-{
-	glm::mat4 view = getViewMatrix();
-	glm::vec3 direction = _direction;
-	if (_pitch > glm::radians(89.9) && _pitch < glm::radians(271.1))
-	{
-		_roll = glm::mod(_roll - roll, glm::radians(360.0));
-	}
-	else
-	{
-		_roll = glm::mod(_roll + roll, glm::radians(360.0));
-	}
-	if (_yaw > glm::radians(89.9) && _yaw < glm::radians(271.1))
-	{
-		_roll_rot = glm::angleAxis(float(_roll), -direction );
-	}
-	else
-	{
-		_roll_rot = glm::angleAxis(float(_roll), direction ) ;
-	}
-
-	_rolled_up = _up * _roll_rot;
-	rotateAroundUpV(0, 0);
 }
 
 
@@ -151,8 +110,8 @@ void TargetCamera::dirOffset(double offset)
 void TargetCamera::fitInView(const AxisAlignedBB& bbox)
 {
 	_dpos = _center - bbox._center;
-
-	glm::vec3 v = (bbox._bleft - bbox._tright) * _rotation;
+	glm::mat3 rotation = getRotationMatrix();
+	glm::vec3 v = rotation * (bbox._bleft - bbox._tright);
 	float lin = glm::length(glm::vec2(v.x, v.y));
 
 	float d = lin / 2.0 / glm::tan(_fov / 2.0);
@@ -160,23 +119,22 @@ void TargetCamera::fitInView(const AxisAlignedBB& bbox)
 }
 
 
-
 void TargetCamera::setEyeV(const glm::vec3& new_eye)
 {
 	_eye = new_eye;
-	_yaw = 0.0f;
-	_pitch = 0.0f;
+	_direction = glm::normalize(_center - _eye);
+	resetVectorsGS();
 }
 void TargetCamera::setTargerV(const glm::vec3& new_target)
 {
 	_center = new_target;
-	_yaw = 0.0f;
-	_pitch = 0.0f;
+	_direction = glm::normalize(_center - _eye);
+	resetVectorsGS();
 }
 void TargetCamera::setUpV(const glm::vec3& new_up)
 {
 	_up = glm::normalize(new_up);
-	_roll = 0.0;
+	resetVectorsGS();
 }
 
 void TargetCamera::setFov(float new_fov)
@@ -185,10 +143,8 @@ void TargetCamera::setFov(float new_fov)
 }
 
 
-
 glm::vec3 TargetCamera::eye()
 {
-
 	return _eye;
 }
 glm::vec3 TargetCamera::target()
@@ -207,4 +163,27 @@ float TargetCamera::fov()
 float TargetCamera::length()
 {
 	return glm::length(_center - _eye) * _dir_offset;
+}
+
+
+glm::mat4 transitionMatrix(const glm::vec3& x, const glm::vec3& y, const glm::vec3& z, const glm::vec3& p)
+{
+	glm::mat4 tr{ 1.0f };
+	tr[0][0] = x[0];
+	tr[1][0] = x[1];
+	tr[2][0] = x[2];
+
+	tr[0][1] = y[0];
+	tr[1][1] = y[1];
+	tr[2][1] = y[2];
+
+	tr[0][2] = z[0];
+	tr[1][2] = z[1];
+	tr[2][2] = z[2];
+
+	tr[3][0] = -glm::dot(p, x);
+	tr[3][1] = -glm::dot(p, y);
+	tr[3][2] = -glm::dot(p, z);
+
+	return tr;
 }
