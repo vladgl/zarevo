@@ -2,25 +2,41 @@
 #include <iostream>
 _ZRV_SOURCE
 
-float get() { return 0.0f; }
+
+
+/*! \brief Returns transition matrix to {x, y, z} coordinate system with center in p;
+*note that triple {x, y, z} should be normalized and orthogonal 
+*/
+glm::mat4 transitionMatrix(const glm::vec3& x, const glm::vec3& y, const glm::vec3& z, const glm::vec3& p);
+
+// Just an operator overload to print glm::vec3
+std::ostream& operator<< (std::ostream& out, glm::vec3 vec)
+{
+	out << vec.x << " " << vec.y << " " << vec.z;
+	return out;
+}
+
+
+void TargetCamera::resetVectorsGS()
+{
+	_direction = glm::normalize(_direction);
+	_right = glm::normalize(glm::cross(_direction, _up));
+	_up = _up - glm::dot(_up, _direction) / glm::dot(_direction, _direction) * _direction;
+	_up = glm::normalize(_up);
+	_rolled_up = _up;
+}
+
+glm::mat3 TargetCamera::getRotationMatrix()
+{
+	return glm::mat3(getViewMatrix());
+}
+
 
 TargetCamera::TargetCamera() :
-	_eye(0.0f, 1.0f, 0.0f), _center(0.0f, 0.0f, 0.0f), _up(0.0f, 0.0f, 1.0f), _label(""), _fov(glm::radians(80.0f))
+	_eye(0.0f, -1.0f, 0.0f), _center(0.0f, 0.0f, 0.0f), _up(0.0f, 0.0f, 1.0f), _label(""), _fov(glm::radians(80.0f))
 {
-	_yaw = 0.0;
-	_pitch = 0.0;
-	_roll = 0.0;
-
-	//Gram–Schmidt process
-	_direction = glm::normalize(_center - _eye);
-	_right = glm::normalize(glm::cross(_direction, _up));
-	_up = glm::cross(_right, _direction);
-	//
-
-	//identity quaternions
-	_rotation = glm::quat({0.0f, 0.0f, 0.0f});
-	_roll_rot = glm::quat({ 0.0f, 0.0f, 0.0f });
-	_rolled_up = _up;
+	_direction = glm::normalize(_center - _eye); 
+	resetVectorsGS();
 	_dpos = glm::vec3(0.0f, 0.0f, 0.0f);
 	_dir_offset = 1.0;
 }
@@ -28,84 +44,57 @@ TargetCamera::TargetCamera() :
 TargetCamera::TargetCamera(glm::vec3 eye, glm::vec3 target, glm::vec3 up, const std::string& label) :
 	_eye(eye), _center(target), _up(glm::normalize(up)), _label(label), _fov(glm::radians(80.0f))
 {	
-	_yaw = 0.0;
-	_pitch = 0.0;
-	_roll = 0.0;
-
-	//Gram–Schmidt process
 	_direction = glm::normalize(_center - _eye);
-	_right = glm::normalize(glm::cross(_direction, _up));
-	_up = glm::cross(_right, _direction);
-	//
-
-	//identity quaternions
-	_rotation = glm::quat({ 0.0f, 0.0f, 0.0f });
-	_roll_rot = glm::quat({ 0.0f, 0.0f, 0.0f });
-	_rolled_up = _up;
-
+	resetVectorsGS();
 	_dpos = glm::vec3(0.0f, 0.0f, 0.0f);
 	_dir_offset = 1.0;
 }
 
 
-glm::mat4 TargetCamera::rotateAroundUpV(double yaw, double pitch)
+void TargetCamera::rotateAroundUpV(double yaw, double pitch)
 {
-	_pitch = glm::mod(_pitch + pitch, glm::radians(360.0));
-
-	if (_pitch > glm::radians(89.9) && _pitch < glm::radians(271.1))
+	float r_yaw = yaw;
+	// if camera is upside down we inverse yaw
+	if (glm::dot(_up, _rolled_up) < 0.0f)
 	{
-		_yaw = glm::mod(_yaw - yaw, glm::radians(360.0));
-
+		r_yaw = -yaw;
 	}
-	else
-	{
-		_yaw = glm::mod(_yaw + yaw, glm::radians(360.0));
+	_direction = _direction * glm::angleAxis(float(r_yaw), _rolled_up);
+	_up = _up * glm::angleAxis(float(r_yaw), _rolled_up);
+	_right = glm::cross(_direction, _up);
 
-	}
-	_rotation =  glm::angleAxis(float(_yaw), _up) * _roll_rot;
-
-	double eps = 0.0002;
-	if ((_pitch < glm::radians(90.0 - eps / 2.0) || _pitch > glm::radians(90 + eps / 2.0)) &&
-		_pitch < glm::radians(270 - eps / 2.0) || _pitch > glm::radians(270 + eps/2.0))
-	{
-		_rotation = glm::angleAxis(float(_pitch), _right) * _rotation;
-	}
-	else
-	{
-		_rotation = glm::angleAxis(float(_pitch + glm::radians(eps)), _right) * _rotation;
-	}
-
-	return glm::mat4_cast(_rotation);
+	_up = _up * glm::angleAxis(float(pitch), _right);
+	_direction = _direction * glm::angleAxis(float(pitch), _right);
 }
 
 void TargetCamera::rollUpV(double roll)
 {
-	if (_pitch > glm::radians(89.9) && _pitch < glm::radians(271.1))
-	{
-		_roll = glm::mod(_roll - roll, glm::radians(360.0));
-	}
-	else
-	{
-		_roll = glm::mod(_roll + roll, glm::radians(360.0));
-	}
-	if (_yaw > glm::radians(89.9) && _yaw < glm::radians(271.1))
-	{
-		_roll_rot = glm::angleAxis(float(_roll), -_direction);
-	}
-	else
-	{
-		_roll_rot = glm::angleAxis(float(_roll), _direction);
-	}
+	_rolled_up = _rolled_up * glm::angleAxis(float(roll), _direction);
+	_up = _up * glm::angleAxis(float(roll), _direction);
+	_right = _right * glm::angleAxis(float(roll), _direction);
+}
 
-	_rolled_up = _up * _roll_rot;
+
+glm::mat4 TargetCamera::getViewMatrix()
+{
+	glm::vec3 eye = _center - _direction * float(_dir_offset);
+	glm::mat4 view{ 1.0f };
+
+	view = transitionMatrix(_right, _up, -_direction, eye);
+	return  glm::translate(view, _dpos);
 }
 
 
 void TargetCamera::parallelOffset(double right, double up)
 {
-//	_dpos += (-float(right) * _right * _rotation + float(up) * _rolled_up) ;
-	_dpos += glm::vec3(float(right), 0.0f, float(up)) * _rotation;
+	glm::mat4 view = getViewMatrix();
+	//view^-1 == view^T, so columns is rows; note that glm::mat4 is column-major
+	glm::vec3 vRight = { view[0][0], view[1][0], view[2][0] };
+	glm::vec3 vUp = { view[0][1], view[1][1], view[2][1] };
+
+	_dpos += -float(right) * vRight - float(up) * vUp;
 }
+
 
 void TargetCamera::dirOffset(double offset)
 {
@@ -115,36 +104,35 @@ void TargetCamera::dirOffset(double offset)
 }
 
 
-glm::mat4 TargetCamera::getViewMatrix()
+
+void TargetCamera::fitInView(const AxisAlignedBB& bbox)
 {
-	glm::vec3 center = _center ;
-	glm::vec3 eye = _center - float(_dir_offset) * (_center - _eye) * _rotation;
-	glm::vec3 vec{ eye.x, center.y - eye.y, eye.z };
-	glm::mat4 view{ 1.0f };
-	if (_pitch > glm::radians(89.9999) && _pitch < glm::radians(269.9999))
-		view = glm::lookAt(vec, center, -_rolled_up);
-	else
-		view = glm::lookAt(vec, center, _rolled_up);
-	
-	return view ;
+	_dpos = _center - bbox._center;
+	glm::mat3 rotation = getRotationMatrix();
+	glm::vec3 v = rotation * (bbox._bleft - bbox._tright);
+	float lin = glm::length(glm::vec2(v.x, v.y));
+
+	float d = lin / 2.0 / glm::tan(_fov / 2.0);
+	_dir_offset = d / glm::length(_eye - _center) * 1.5;
 }
+
 
 void TargetCamera::setEyeV(const glm::vec3& new_eye)
 {
 	_eye = new_eye;
-	_yaw = 0.0f;
-	_pitch = 0.0f;
+	_direction = glm::normalize(_center - _eye);
+	resetVectorsGS();
 }
 void TargetCamera::setTargerV(const glm::vec3& new_target)
 {
 	_center = new_target;
-	_yaw = 0.0f;
-	_pitch = 0.0f;
+	_direction = glm::normalize(_center - _eye);
+	resetVectorsGS();
 }
 void TargetCamera::setUpV(const glm::vec3& new_up)
 {
 	_up = glm::normalize(new_up);
-	_roll = 0.0;
+	resetVectorsGS();
 }
 
 void TargetCamera::setFov(float new_fov)
@@ -153,10 +141,8 @@ void TargetCamera::setFov(float new_fov)
 }
 
 
-
 glm::vec3 TargetCamera::eye()
 {
-
 	return _eye;
 }
 glm::vec3 TargetCamera::target()
@@ -177,25 +163,25 @@ float TargetCamera::length()
 	return glm::length(_center - _eye) * _dir_offset;
 }
 
-void TargetCamera::recalcOffsets()
+
+glm::mat4 transitionMatrix(const glm::vec3& x, const glm::vec3& y, const glm::vec3& z, const glm::vec3& p)
 {
-	glm::vec3 temp = _eye - _center;
-	float len = glm::length(temp);
-	if (len < std::numeric_limits<float>::epsilon())
-	{
-		_pitch = _yaw = 0;
-		return;
-	}
-	else
-	{
-		_pitch = glm::asin(temp.z / len);
-	}
-	if (std::abs(temp.x) < std::numeric_limits<float>::epsilon())
-	{
-		_yaw = glm::radians(90.0f);
-	}
-	else
-	{
-		_yaw = glm::atan(temp.y / temp.x);
-	}
+	glm::mat4 tr{ 1.0f };
+	tr[0][0] = x[0];
+	tr[1][0] = x[1];
+	tr[2][0] = x[2];
+
+	tr[0][1] = y[0];
+	tr[1][1] = y[1];
+	tr[2][1] = y[2];
+
+	tr[0][2] = z[0];
+	tr[1][2] = z[1];
+	tr[2][2] = z[2];
+
+	tr[3][0] = -glm::dot(p, x);
+	tr[3][1] = -glm::dot(p, y);
+	tr[3][2] = -glm::dot(p, z);
+
+	return tr;
 }

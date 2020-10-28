@@ -9,3 +9,13 @@
 static std::ofstream logger("log.txt", std::ios::app);
 #define ZRV_LOG logger
 #endif
+
+
+/*
+std::ostream& operator<< (std::ostream& out, glm::vec3 vec)
+{
+	out << vec.x << " " << vec.y << " " << vec.z;
+	return out;
+}
+
+*/

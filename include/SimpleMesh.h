@@ -1,8 +1,7 @@
 #pragma once
 #include "zarevo_base.h"
-
+#include "BBox.h"
 _ZRV_BEGIN
-
 
 struct SimpleMesh
 {
@@ -20,6 +19,12 @@ struct SimpleMesh
 	zrv::ArrayObject _array_object;
 	zrv::BufferObject _array_buffer, _texcoord_buffer, _index_buffer;
 	zrv::TextureObject _texture;
+	AxisAlignedBB _bbox;
+	glm::mat4 _model_matrix;
+
+private:
+	SimpleMesh(const SimpleMesh&) = delete;
+	void operator=(const SimpleMesh&) = delete;
 };
 
 _ZRV_END

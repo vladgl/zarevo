@@ -9,12 +9,12 @@
 layout(location = ATTR_POSITION) in vec3 position;
 layout(location = ATTR_TEXCOORD) in vec2 texCoord;
 
-uniform mat4 model, view, projection;
+uniform mat4 zrv_UModel, view, projection;
 
 out vec2 tex_coord;
 
 void main()
 {
-    gl_Position = projection * view * model * vec4( position, 1.0);  
+    gl_Position = projection * view * zrv_UModel * vec4( position, 1.0);  
     tex_coord = texCoord;
 }

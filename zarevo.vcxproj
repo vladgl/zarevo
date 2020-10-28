@@ -159,6 +159,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\BBox.h" />
     <ClInclude Include="include\OpenGLWrapper\Image2D.h" />
     <ClInclude Include="include\OpenGLWrapper\OglBase.h" />
     <ClInclude Include="include\OpenGLWrapper\OglObjects\ArrayObject.h" />
@@ -176,6 +177,7 @@
     <ClInclude Include="include\zrv_logger.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\BBox.cpp" />
     <ClCompile Include="src\Image2D.cpp" />
     <ClCompile Include="src\OglBase.cpp" />
     <ClCompile Include="src\ArrayObject.cpp" />
