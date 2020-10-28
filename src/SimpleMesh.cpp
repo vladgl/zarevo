@@ -80,9 +80,9 @@ void SimpleMesh::loadFromFile(const std::string& path)
 	//vertex position
 	for (size_t i = 0; i < mesh->mNumVertices; ++i)
 	{
-		_vertices.push_back(mesh->mVertices[i].x);
-		_vertices.push_back(mesh->mVertices[i].y);
-		_vertices.push_back(mesh->mVertices[i].z);
+		_vertices.push_back(mesh->mVertices[i].x );
+		_vertices.push_back(mesh->mVertices[i].y );
+		_vertices.push_back(mesh->mVertices[i].z );
 	}
 	//texture coordinates
 	if (mesh->mTextureCoords)

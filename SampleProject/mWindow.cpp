@@ -41,8 +41,9 @@ void mWindow::initGl()
 
 
 //	mesh.initMesh(std::move(vertices), std::move(indices), std::move(texCoord), "zx.png");
-	mesh.loadFromFile("spider.obj");
-	mesh._model_matrix = glm::scale(mesh._model_matrix, glm::vec3{ 0.5f, 0.5f, 0.5f });
+	mesh.loadFromFile("2c.obj");
+	mesh._model_matrix = glm::scale(mesh._model_matrix, glm::vec3{ 0.2f });
+	mesh._model_matrix[3][3] = 1.0f;
 	mesh._bbox.createBbox(mesh);
     _cam.fitInView(mesh._bbox);
 
@@ -50,10 +51,6 @@ void mWindow::initGl()
 	{
 		ZRV_LOG << m_prog.getLog();
 	}
-//	glEnable(GL_CULL_FACE);
-
-
-//	model = glm::translate(model, glm::vec3(.3f, 0.0f, 0.0f));
 
 	PROJECTION_CALL(Projection::Perspective)
 	m_prog.use();

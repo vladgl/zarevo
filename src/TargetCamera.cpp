@@ -116,9 +116,9 @@ void TargetCamera::dirOffset(double offset)
 void TargetCamera::fitInView(const AxisAlignedBB& bbox)
 {
 	_center = bbox._center;
-//	glm::mat3 rotation = getRotationMatrix();
-	glm::vec3 v = bbox._bleft - bbox._tright;
-	float lin = glm::length(glm::vec2(v.x, v.y));
+	glm::mat3 rotation = getRotationMatrix();
+	glm::vec3 v = rotation * (bbox._bleft - bbox._tright);
+	float lin = glm::length(v);
 
 	float d = lin / 2.0 / glm::tan(_fov / 2.0);
 	_eye = _center - _direction * d;
