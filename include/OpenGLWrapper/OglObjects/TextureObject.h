@@ -17,7 +17,7 @@ public:
 	TextureObject();
 
 	~TextureObject();
-	void bind(unsigned short unit = 0);
+	void bind(unsigned short unit = 0) const;
 	void release();
 	bool setImage(const Image2D& img);
 	void setWrapping(Wrapping wrap_s_t);

@@ -38,7 +38,7 @@ TextureObject::~TextureObject()
 	glDeleteTextures(1, &_object_name);
 }
 
-void TextureObject::bind(unsigned short unit)
+void TextureObject::bind(unsigned short unit) const
 {
 	glActiveTexture(GL_TEXTURE0 + unit);
 	glBindTexture(_gl_type, _object_name);
