@@ -40,15 +40,18 @@ void mWindow::initGl()
 
 
 
-	mesh.initMesh(vertices, indices, texCoord, "zx.png");
-
+//	mesh.initMesh(std::move(vertices), std::move(indices), std::move(texCoord), "zx.png");
+	mesh.loadFromFile("spider.obj");
+	mesh._model_matrix = glm::scale(mesh._model_matrix, glm::vec3{ 0.5f, 0.5f, 0.5f });
+	mesh._bbox.createBbox(mesh);
+    _cam.fitInView(mesh._bbox);
 
 	if (!m_prog.init("base_sh.vert", "base_sh.frag"))
 	{
 		ZRV_LOG << m_prog.getLog();
 	}
 //	glEnable(GL_CULL_FACE);
-	glm::mat4 model{ 1.0f }, view{ 1.0f }, projection{ 1.0f };
+
 
 //	model = glm::translate(model, glm::vec3(.3f, 0.0f, 0.0f));
 
@@ -56,8 +59,8 @@ void mWindow::initGl()
 	m_prog.use();
 
 	GLint model_pos = m_prog.getUnifLoc("zrv_UModel");
-	GLint view_pos = m_prog.getUnifLoc("view");
-	GLint proj_pos = m_prog.getUnifLoc("projection");
+	GLint view_pos = m_prog.getUnifLoc("zrv_UView");
+	GLint proj_pos = m_prog.getUnifLoc("zrv_UProj");
 
 	glUniformMatrix4fv(model_pos, 1, GL_FALSE, glm::value_ptr(mesh._model_matrix));
 	glUniformMatrix4fv(view_pos, 1, GL_FALSE, glm::value_ptr(_cam.getViewMatrix()));
@@ -84,20 +87,26 @@ void mWindow::paintGl()
 		glEnable(GL_CULL_FACE);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glCullFace(GL_BACK);
+		mesh.useColor(false);
 		mesh.drawMesh(m_prog);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glCullFace(GL_FRONT);
+		mesh.useColor(true);
 		mesh.drawMesh(m_prog);
 	}
 	else
 	{
-		glDisable(GL_CULL_FACE);
+		glEnable(GL_CULL_FACE);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+		glCullFace(GL_BACK);
+		mesh.useColor(false);
+		mesh.drawMesh(m_prog);
+
+		glCullFace(GL_FRONT);
+		mesh.useColor(true);
 		mesh.drawMesh(m_prog);
 	}
-
-	//mesh.useColor();
-    //mesh.useTexture();
 }
 
 void mWindow::keyEvent(int key, int scancode, int action, int mode)
@@ -131,7 +140,7 @@ void mWindow::keyEvent(int key, int scancode, int action, int mode)
 	{
 		_cam.fitInView(mesh._bbox);
 		m_prog.use();
-		GLint pos = m_prog.getUnifLoc("view");
+		GLint pos = m_prog.getUnifLoc("zrv_UView");
 		glUniformMatrix4fv(pos, 1, GL_FALSE, glm::value_ptr(_cam.getViewMatrix()));
 		m_prog.release();
 	}
@@ -182,7 +191,7 @@ void mWindow::mouseMoveEvent(double xpos, double ypos)
 			_cam.rotateAroundUpV(dx * mouse.sensivity / _fw, dy * mouse.sensivity / _fh);
 		}
 		m_prog.use();
-		GLint pos = m_prog.getUnifLoc("view");
+		GLint pos = m_prog.getUnifLoc("zrv_UView");
 		glUniformMatrix4fv(pos, 1, GL_FALSE, glm::value_ptr(_cam.getViewMatrix()));
 		m_prog.release();
 	}
@@ -192,7 +201,7 @@ void mWindow::mouseMoveEvent(double xpos, double ypos)
 		double pan_coef = 2.0 * double(_cam.length()) * glm::tan(_cam.fov() / 2.0) / std::min<float>(_fw, _fh);
 		_cam.parallelOffset(-dx * pan_coef, dy * pan_coef);
 		m_prog.use();
-		GLint pos = m_prog.getUnifLoc("view");
+		GLint pos = m_prog.getUnifLoc("zrv_UView");
 		glUniformMatrix4fv(pos, 1, GL_FALSE, glm::value_ptr(_cam.getViewMatrix()));
 		m_prog.release();
 	}
@@ -221,7 +230,7 @@ void mWindow::scrollEvent(double xoffset, double yoffset)
 			_cam.dirOffset(1.1);
 		PROJECTION_CALL(_proj);
 		m_prog.use();
-		GLint pos = m_prog.getUnifLoc("view");
+		GLint pos = m_prog.getUnifLoc("zrv_UView");
 		glUniformMatrix4fv(pos, 1, GL_FALSE, glm::value_ptr(_cam.getViewMatrix()));
 		m_prog.release();
 	}
