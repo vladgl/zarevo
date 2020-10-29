@@ -39,6 +39,7 @@ TargetCamera::TargetCamera() :
 	resetVectorsGS();
 	_dpos = glm::vec3(0.0f, 0.0f, 0.0f);
 	_dir_offset = 1.0;
+	_length = glm::length(_eye - _center);
 }
 
 TargetCamera::TargetCamera(glm::vec3 eye, glm::vec3 target, glm::vec3 up, const std::string& label) :
@@ -48,6 +49,7 @@ TargetCamera::TargetCamera(glm::vec3 eye, glm::vec3 target, glm::vec3 up, const 
 	resetVectorsGS();
 	_dpos = glm::vec3(0.0f, 0.0f, 0.0f);
 	_dir_offset = 1.0;
+	_length = glm::length(_eye - _center);
 }
 
 
@@ -65,6 +67,8 @@ void TargetCamera::rotateAroundUpV(double yaw, double pitch)
 
 	_up = _up * glm::angleAxis(float(pitch), _right);
 	_direction = _direction * glm::angleAxis(float(pitch), _right);
+
+	_eye = _center - _direction * _length;
 }
 
 void TargetCamera::rollUpV(double roll)
@@ -72,16 +76,16 @@ void TargetCamera::rollUpV(double roll)
 	_rolled_up = _rolled_up * glm::angleAxis(float(roll), _direction);
 	_up = _up * glm::angleAxis(float(roll), _direction);
 	_right = _right * glm::angleAxis(float(roll), _direction);
+	_eye = _center - _direction * _length;
 }
 
 
 glm::mat4 TargetCamera::getViewMatrix()
 {
-	glm::vec3 eye = _center - _direction * float(_dir_offset);
 	glm::mat4 view{ 1.0f };
 
-	view = transitionMatrix(_right, _up, -_direction, eye);
-	return  glm::translate(view, _dpos);
+	view = transitionMatrix(_right, _up, -_direction, _eye);
+	return view;
 }
 
 
@@ -92,28 +96,34 @@ void TargetCamera::parallelOffset(double right, double up)
 	glm::vec3 vRight = { view[0][0], view[1][0], view[2][0] };
 	glm::vec3 vUp = { view[0][1], view[1][1], view[2][1] };
 
-	_dpos += -float(right) * vRight - float(up) * vUp;
+	glm::vec3 dpos = float(right) * vRight + float(up) * vUp;
+	_eye += dpos;
+	_center += dpos;
 }
 
 
 void TargetCamera::dirOffset(double offset)
 {
-	_dir_offset *= offset;
-	if (_dir_offset < 0.001)
-		_dir_offset = 0.001;
+	if (_length * offset > 0.0001)
+	{
+		_eye = _center - _direction * _length * float(offset);
+		_length = glm::length(_eye - _center);
+	}
 }
 
 
 
 void TargetCamera::fitInView(const AxisAlignedBB& bbox)
 {
-	_dpos = _center - bbox._center;
+	_center = bbox._center;
 	glm::mat3 rotation = getRotationMatrix();
 	glm::vec3 v = rotation * (bbox._bleft - bbox._tright);
-	float lin = glm::length(glm::vec2(v.x, v.y));
+	float lin = glm::length(v);
 
 	float d = lin / 2.0 / glm::tan(_fov / 2.0);
-	_dir_offset = d / glm::length(_eye - _center) * 1.5;
+	_eye = _center - _direction * d;
+	_length = glm::length(_eye - _center);
+//	_dir_offset = d / glm::length(_eye - _center) ;
 }
 
 
@@ -122,12 +132,14 @@ void TargetCamera::setEyeV(const glm::vec3& new_eye)
 	_eye = new_eye;
 	_direction = glm::normalize(_center - _eye);
 	resetVectorsGS();
+	_length = glm::length(_eye - _center);
 }
 void TargetCamera::setTargerV(const glm::vec3& new_target)
 {
 	_center = new_target;
 	_direction = glm::normalize(_center - _eye);
 	resetVectorsGS();
+	_length = glm::length(_eye - _center);
 }
 void TargetCamera::setUpV(const glm::vec3& new_up)
 {

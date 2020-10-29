@@ -13,7 +13,7 @@ class TargetCamera
 public:
 	TargetCamera();
 	TargetCamera(glm::vec3 eye, glm::vec3 target, glm::vec3 up, const std::string& label = "");
-/*! \brief Returns transition matrix for camera
+/** \brief Returns transition matrix for camera
 *   \return Homogenius 4x4 view matrix  
 */ 
 	glm::mat4 getViewMatrix();
@@ -43,7 +43,7 @@ private:
 	void resetVectorsGS();
 	glm::vec3 _eye, _center;
 	glm::vec3 _up, _direction, _right, _rolled_up, _dpos;
-	float _fov;
+	float _fov, _length;
 	double _dir_offset;
 	std::string _label;
 };
