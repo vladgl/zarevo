@@ -1,17 +1,20 @@
 #pragma once
 #include "zarevo_base.h"
+#include "BBox.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+
+#include <vector>
 
 // Thanks to "The DCEL Data Structure for 3D Graphics" from Holmes3D.net
 // http://www.holmes3d.net/graphics/dcel/
 
 _ZRV_BEGIN
 
-class Vertex;
-class Face;
-class Mesh;
+struct Vertex;
+struct Face;
+struct Mesh;
 
 struct HalfEdge
 {
@@ -25,20 +28,12 @@ struct HalfEdge
     {}
     HalfEdge(const HalfEdge& edge);
 
-    /// Comes from
-    inline Vertex* orig() const { return orig; }
     /// Leads to
-    inline Vertex* dest() const { return twin->orig; }
+    inline Vertex* dest() const { return next->orig; }
 
-    operator glm::vec3() const { return dest()->coords - orig->coords; }
+    inline glm::vec3 asVec3() const;
 
-    ~HalfEdge()
-    {
-        delete orig;
-        delete twin;
-        delete next;
-        delete face;
-    }
+    ~HalfEdge();
 };
 
 struct Vertex
@@ -49,20 +44,15 @@ struct Vertex
     // vertex id
     unsigned int id;
 
-    Vertex() : coords({ 0,0,0 }), normal({ 0,0,0 }), leaving(nullptr) {}
-    Vertex(const Vertex& vert) :
-        coords(vert.coords), normal(vert.normal),
-        leaving(new HalfEdge(*vert.leaving))
-    {}
-    
     Vertex
     (
         unsigned int id = 0,
-        glm::vec3 coords = {0,0,0},
-        glm::vec3 normal = {0,0,0},
+        glm::vec3 coords = { 0,0,0 },
+        glm::vec3 normal = { 0,0,0 },
         HalfEdge* leaving = nullptr
-    ) :
-        id(id), coords(coords), normal(normal), leaving(leaving) {}
+    );
+    
+    Vertex(const Vertex& vert);
     
     inline Vertex* next() const { return leaving->next->orig; }
     inline Vertex* prev() const { return leaving->twin->next->next->orig; }
@@ -70,7 +60,7 @@ struct Vertex
     inline HalfEdge* entring() const { return leaving->twin->next->twin; }
     HalfEdge* getEdgeTo (const Vertex* v) const;
 
-    ~Vertex() { delete leaving; }
+    ~Vertex();
 };
 
 struct Face
@@ -78,12 +68,10 @@ struct Face
     glm::vec3 normal;
     HalfEdge* edge;
 
-    Face() : normal({ 0,0,0 }), edge(nullptr) {}
+    Face();
     Face(const Face& face);
 
-    bool dropVert(const Vertex* v);
-
-    ~Face() { delete edge; }
+    ~Face();
 };
 
 /**
@@ -91,15 +79,17 @@ struct Face
  */
 struct Mesh
 {
-    Vertex*   vertList;
-    Face*     faceList;
-    HalfEdge* halfedgeList;
+    std::vector<Vertex>   vertList;
+    std::vector<Face>     faceList;
+    std::vector<HalfEdge> halfedgeList;
 
     /// scales from 0 (invisible) to 100 (fully visible) 
     uint8_t opacity;
     inline bool isVisible() const { return opacity != 0; }
 
     std::vector<GLfloat> _texCoord;
+    glm::mat4 _model_matrix;
+	AxisAlignedBB _bbox;
 
     /// TODO: add reserved numbers for objects for automatic name generation
     Mesh(const std::string& label = "Mesh");
@@ -109,47 +99,35 @@ struct Mesh
      * Assumes to recieved data to ve triangulated (aiProcess_Triangulate is used)
      * \returns this
      */
-    Mesh* readObj (const std::string& path_to_obj);
+    Mesh* loadFromFile (const std::string& path_to_obj);
 
     void init
     (
-        Vertex*   verts,
-        Face*     faces,
-        HalfEdge* edges,
-        std::vector<GLfloat> texCoords,
-        const std::string&   tex_path
+        std::vector<Vertex>&   verts,
+        std::vector<Face>&     faces,
+        std::vector<HalfEdge>& edges,
+        std::vector<GLfloat>&  texCoords,
+        const std::string&     tex_path
     );
 
-    bool triangulate();
     std::vector<unsigned int> getIndices();
 
-    void draw(const ShaderProgram& program) const;
+    void useColor(bool use) { _use_color_flag = use; }
 
-    bool center(glm::vec3* vec) const;
+    void drawMesh(const ShaderProgram& program);
 
     void clear   ();
     bool isEmpty () const;
-    inline bool isTriangulated() const { return isTriangulated; }
 
-    void insert (const Vertex& v);
-    void insert (const Face& f);
-    void insert (const HalfEdge& e);
-
-    ~Mesh()
-    {
-        delete vertList;
-        delete faceList;
-        delete halfedgeList;
-    }
+    ~Mesh(){}
 
 private:
-    unsigned int _numVertices, _numFaces, _numHalfedges;
-    bool _isTriangulated, _isInited;
+    bool _isInited, _use_color_flag;
 
     //OGL stuff
     zrv::ArrayObject   _array_object;
     zrv::BufferObject  _array_buffer, _texcoord_buffer, _index_buffer;
-    zrv::TextureObject _texture;
+    zrv::TextureObject _texture, _default_color;
 };
 
 _ZRV_END

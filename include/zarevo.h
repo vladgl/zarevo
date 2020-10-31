@@ -2,7 +2,7 @@
 #include "zarevo_base.h"
 #include "zrv_logger.h"
 #include "OpenGLWrapper/OglWrapper.h"
-#include "SimpleMesh.h"
+#include "Mesh.h"
 #include "TargetCamera.h"
 #include "Window.h"
 

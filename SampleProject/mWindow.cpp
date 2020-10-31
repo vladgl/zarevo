@@ -14,6 +14,7 @@ void mWindow::initGl()
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 
+	/*
 	std::vector<GLfloat> vertices =
 	{
 		-0.5f, 0.0f,  0.5f,
@@ -37,11 +38,11 @@ void mWindow::initGl()
 		0, 1, 3,
 		1, 2, 3
 	};
-
+	*/
 
 
 //	mesh.initMesh(std::move(vertices), std::move(indices), std::move(texCoord), "zx.png");
-	mesh.loadFromFile("2c.obj");
+	mesh.loadFromFile("D:\\Prog\\nrtl-master\\obj\\2\\2c.obj");
 	mesh._model_matrix = glm::scale(mesh._model_matrix, glm::vec3{ 0.2f });
 	mesh._model_matrix[3][3] = 1.0f;
 	mesh._bbox.createBbox(mesh);
@@ -49,7 +50,7 @@ void mWindow::initGl()
 
 	if (!m_prog.init("base_sh.vert", "base_sh.frag"))
 	{
-		ZRV_LOG << m_prog.getLog();
+		ZRV_LOG << m_prog.getLog() << std::endl;
 	}
 
 	PROJECTION_CALL(Projection::Perspective)

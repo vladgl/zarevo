@@ -72,7 +72,7 @@ public:
 private:
 	PROJECTION_STATES
 	zrv::ShaderProgram m_prog;
-	zrv::SimpleMesh mesh;
+	zrv::Mesh mesh;
 
 	GLfloat cutOff;
 	GLfloat outerCutOff;
