@@ -129,13 +129,16 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>C:\OGLFiles\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Prog\ext\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
       </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>D:\Prog\ext\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -179,6 +182,7 @@
   <ItemGroup>
     <ClCompile Include="src\BBox.cpp" />
     <ClCompile Include="src\Image2D.cpp" />
+    <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\OglBase.cpp" />
     <ClCompile Include="src\ArrayObject.cpp" />
     <ClCompile Include="src\BufferObject.cpp" />

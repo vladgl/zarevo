@@ -13,15 +13,20 @@
 
 using namespace std;
 
-int main()
+int dostuff()
 {
 	ZRV_LOG << "Proj started\n";
 	mWindow wnd(1000, 800, "Sample Project");
-    auto return_val = wnd.exec();
-	
+    return wnd.exec();    
+}
+
+int main()
+{
+    int return_val = dostuff();
+
     #ifdef __CRTDBG_MAP_ALLOC
         _CrtDumpMemoryLeaks();
     #endif
 
-    return return_val;    
+	return return_val;
 }

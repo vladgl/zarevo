@@ -8,40 +8,28 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+void GLAPIENTRY
+MessageCallback(GLenum source,
+	GLenum type,
+	GLuint id,
+	GLenum severity,
+	GLsizei length,
+	const GLchar* message,
+	const void* userParam)
+{
+	fprintf(stdout, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+		(type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
+		type, severity, message);
+}
 
 void mWindow::initGl()
 {
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(MessageCallback, 0);
+
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 
-	/*
-	std::vector<GLfloat> vertices =
-	{
-		-0.5f, 0.0f,  0.5f,
-		-0.5f, 0.0f, -0.5f,
-		 0.5f, 0.0f, -0.5f,
-		 0.5f, 0.0f,  0.5f,
-	};
-
-
-	std::vector<GLfloat> texCoord =
-	{
-		0.0f, 1.0f,
-		0.0f, 0.0f,
-		1.0f, 0.0f,
-		1.0f, 1.0f
-	};
-
-
-
-	std::vector<GLuint> indices = {
-		0, 1, 3,
-		1, 2, 3
-	};
-	*/
-
-
-//	mesh.initMesh(std::move(vertices), std::move(indices), std::move(texCoord), "zx.png");
 	mesh.loadFromFile("D:\\Prog\\nrtl-master\\obj\\2\\2c.obj");
 	mesh._model_matrix = glm::scale(mesh._model_matrix, glm::vec3{ 0.2f });
 	mesh._model_matrix[3][3] = 1.0f;

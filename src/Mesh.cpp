@@ -14,28 +14,15 @@ _ZRV_SOURCE
 
 HalfEdge::HalfEdge(const HalfEdge& edge)
 {
-    if (edge.orig == nullptr) this->orig = nullptr;
-    else this->orig = new Vertex(*edge.orig);
-
-    if (edge.twin == nullptr) this->twin = nullptr;
-    else this->twin = new HalfEdge(*edge.twin);
-
-    if (edge.next == nullptr) this->next = nullptr;
-    else this->next = new HalfEdge(*edge.next);
-
-    if (edge.face == nullptr) this->face = nullptr;
-    else this->face = new Face(*edge.face);
+    this->orig = edge.orig;
+    this->twin = edge.twin;
+    this->next = edge.next;
+    this->face = edge.face;
 }
 
 inline glm::vec3 HalfEdge::asVec3() const { return dest()->coords - orig->coords; }
 
-HalfEdge::~HalfEdge()
-{
-	delete orig;
-	delete twin;
-	delete next;
-	delete face;
-}
+HalfEdge::~HalfEdge() {}
 
 //=============================================================================
 
@@ -105,7 +92,7 @@ Mesh::Mesh (const std::string& label) :
     opacity(100),
     _array_object(label),
     _array_buffer(zrv::BufferObject::BufferType::Array, label),
-    _texcoord_buffer(zrv::BufferObject::BufferType::Array, label),
+    _texcoord_buffer(zrv::BufferObject::BufferType::Array, label + "tex_coord"),
     _index_buffer(zrv::BufferObject::BufferType::ElementArray, label),
     _texture(zrv::TextureObject::TextureType::Texture2D, label + "_texture"),
 	_default_color(zrv::TextureObject::TextureType::Texture2D, label + "_color"),
@@ -130,21 +117,23 @@ Mesh* Mesh::loadFromFile(const std::string& path_to_obj)
 
     this->clear();
     
+	// we have only one frame == only one (root) node and only one model in it's only child
+	aiMesh* ai_mesh = scene->mMeshes[scene->mRootNode->mChildren[0]->mMeshes[0]];
+
     //mesh stuff
     if (scene->HasMeshes())
     {
-        // we have only one frame == only one (root) node and only one model in it's only child
-        aiMesh* ai_mesh = scene->mMeshes[scene->mRootNode->mChildren[0]->mMeshes[0]];
         //1) getting verts
-        vertList.resize(ai_mesh->mNumVertices);
         for (unsigned int i = 0; i != ai_mesh->mNumVertices; ++i)
         {
-            vertList[i].id = i;
-            vertList[i].coords =
+            Vertex vert;
+            vert.id = i;
+            vert.coords =
 				{ ai_mesh->mVertices[i].x, ai_mesh->mVertices[i].y, ai_mesh->mVertices[i].z };
-            vertList[i].normal =
+            vert.normal =
 				{ ai_mesh->mNormals[i].x, ai_mesh->mNormals[i].y, ai_mesh->mNormals[i].z };
-            vertList[i].leaving = nullptr;
+            vert.leaving = nullptr;
+            vertList.push_back(vert);
         }
         
         //2) getting faces and halfedges
@@ -167,76 +156,65 @@ Mesh* Mesh::loadFromFile(const std::string& path_to_obj)
 
             */
 
-            HalfEdge* e1 = &halfedgeList[i * 3];
-            HalfEdge* e2 = &halfedgeList[i * 3 + 1];
-            HalfEdge* e3 = &halfedgeList[i * 3 + 2];
-            Face* f = &faceList[i];
-
             //setting origs for edges in this face
-            e1->orig = &vertList[ai_mesh->mFaces[i].mIndices[0]];
-            e2->orig = &vertList[ai_mesh->mFaces[i].mIndices[1]];
-            e3->orig = &vertList[ai_mesh->mFaces[i].mIndices[2]];
+            halfedgeList[i * 3].orig = &vertList[ai_mesh->mFaces[i].mIndices[0]];
+            halfedgeList[i * 3 + 1].orig = &vertList[ai_mesh->mFaces[i].mIndices[1]];
+            halfedgeList[i * 3 + 2].orig = &vertList[ai_mesh->mFaces[i].mIndices[2]];
 
             //setting next for edges
-            e1->next = e2;
-            e2->next = e3;
-            e3->next = e1;
+            halfedgeList[i * 3].next = &halfedgeList[i * 3 + 1];
+            halfedgeList[i * 3 + 1].next = &halfedgeList[i * 3 + 2];
+            halfedgeList[i * 3 + 2].next = &halfedgeList[i * 3];
 
             //giving them face
-            e1->face = e2->face = e3->face = f;
-
-            //giving new face an edge
-            f->edge = e1;
+            halfedgeList[i * 3].face = halfedgeList[i * 3 + 1].face = halfedgeList[i * 3 + 2].face = &faceList[i];
 
             //calculation normal for face as a normalized cross of two edges
-            f->normal = glm::normalize(glm::cross(e1->asVec3(), e2->asVec3()));
+            faceList[i].normal = glm::normalize(glm::cross(halfedgeList[i * 3].asVec3(), halfedgeList[i * 3 + 1].asVec3()));
 
             //giving twins to edges
-			if (e1->orig->leaving != nullptr &&
-				e1->orig->leaving->next->orig == e2->orig)
-				e1->twin = e1->orig->leaving;
+			if (halfedgeList[i * 3].orig->leaving != nullptr &&
+				halfedgeList[i * 3].orig->leaving->next->orig == halfedgeList[i * 3 + 1].orig)
+				halfedgeList[i * 3].twin = halfedgeList[i * 3].orig->leaving;
 
-			if (e2->orig->leaving != nullptr &&
-				e2->orig->leaving->next->orig == e3->orig)
-				e2->twin = e2->orig->leaving;
+			if (halfedgeList[i * 3 + 1].orig->leaving != nullptr &&
+				halfedgeList[i * 3 + 1].orig->leaving->next->orig == halfedgeList[i * 3 + 2].orig)
+				halfedgeList[i * 3 + 1].twin = halfedgeList[i * 3 + 1].orig->leaving;
 
-			if (e3->orig->leaving != nullptr &&
-				e3->orig->leaving->next->orig == e1->orig)
-				e3->twin = e3->orig->leaving;
+			if (halfedgeList[i * 3 + 2].orig->leaving != nullptr &&
+				halfedgeList[i * 3 + 2].orig->leaving->next->orig == halfedgeList[i * 3].orig)
+				halfedgeList[i * 3 + 2].twin = halfedgeList[i * 3 + 2].orig->leaving;
 
             //updating leavings for origs
-            e1->orig->leaving = e1;
-            e2->orig->leaving = e2;
-            e3->orig->leaving = e3;
+            halfedgeList[i * 3].orig->leaving = &halfedgeList[i * 3];
+            halfedgeList[i * 3 + 1].orig->leaving = &halfedgeList[i * 3 + 1];
+            halfedgeList[i * 3 + 2].orig->leaving = &halfedgeList[i * 3 + 2];
+
+            //giving new face an edge
+            faceList[i].edge = &halfedgeList[i * 3];
+
         }
     }
 
-    if (scene->HasTextures())
+    //if (scene->HasTextures())
     {
-
-        //_use_color_flag = true;
+		for (size_t i = 0; i < ai_mesh->mNumVertices; ++i)
+		{
+			_texCoord.push_back(ai_mesh->mTextureCoords[0][i].x);
+			_texCoord.push_back(ai_mesh->mTextureCoords[0][i].y);
+		}
+        _use_color_flag = true;
     }
 
+    this->init("D:\\Prog\\nrtl-master\\obj\\2\\105227.png");
     return this;
 }
 
 /**
  * init OGL stuff
  */
-void Mesh::init
-(
-	std::vector<Vertex>&   verts,
-	std::vector<Face>&     faces,
-	std::vector<HalfEdge>& edges,
-	std::vector<GLfloat>&  texCoords,
-	const std::string&     tex_path
-)
+void Mesh::init(const std::string& tex_path)
 {
-    vertList = verts;
-    faceList = faces;
-    halfedgeList = edges;
-
-
     Image2D img{ tex_path };
     if (img.format() == Image2D::Format::UNSUPPORTED)
     {
@@ -253,9 +231,17 @@ void Mesh::init
     _array_object.bind();
 
     _array_buffer.bind();
-    //_array_buffer.allocate(vertList);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertList.size(), &vertList[0], GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
+    _array_buffer.allocate(getVertexCoords());
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertList.size(), &vertList[0], GL_STATIC_DRAW);
+    /*
+    for (unsigned int i = 0; i != vertList.size(); ++i)
+    {
+        glBufferSubData(GL_ARRAY_BUFFER, 3 * i * sizeof(float), sizeof(float), &vertList[i].coords.x);
+        glBufferSubData(GL_ARRAY_BUFFER, (3 * i + 1) * sizeof(float), sizeof(float), &vertList[i].coords.y);
+        glBufferSubData(GL_ARRAY_BUFFER, (3 * i + 2) * sizeof(float), sizeof(float), &vertList[i].coords.z);
+    }
+    */
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
     glEnableVertexAttribArray(0);
     _array_buffer.release();
 
@@ -275,6 +261,18 @@ void Mesh::init
     _use_color_flag = true;
 }
 
+std::vector<float> Mesh::getVertexCoords()
+{
+    std::vector<float> res;
+    for (auto& i : vertList)
+    {
+        res.push_back(i.coords.x);
+        res.push_back(i.coords.y);
+        res.push_back(i.coords.z);
+    }
+    return res;
+}
+
 /**
 * Get vector of indices for EBO
 * triangulates mesh if not triangulated
@@ -290,7 +288,10 @@ std::vector<unsigned int> Mesh::getIndices()
     {
         HalfEdge* tempHE = faceList[i].edge;
         do
+        {
             result.push_back(tempHE->orig->id);
+            tempHE = tempHE->next;
+        }
         while (tempHE != faceList[i].edge);
     }
 

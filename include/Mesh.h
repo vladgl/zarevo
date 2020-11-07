@@ -28,7 +28,7 @@ struct HalfEdge
     {}
     HalfEdge(const HalfEdge& edge);
 
-    /// Leads to
+    /// \returns pointer to vertex, where this edge is pointing
     inline Vertex* dest() const { return next->orig; }
 
     inline glm::vec3 asVec3() const;
@@ -100,16 +100,9 @@ struct Mesh
      * \returns this
      */
     Mesh* loadFromFile (const std::string& path_to_obj);
+    void init(const std::string& tex_path);
 
-    void init
-    (
-        std::vector<Vertex>&   verts,
-        std::vector<Face>&     faces,
-        std::vector<HalfEdge>& edges,
-        std::vector<GLfloat>&  texCoords,
-        const std::string&     tex_path
-    );
-
+    std::vector<float>        getVertexCoords();
     std::vector<unsigned int> getIndices();
 
     void useColor(bool use) { _use_color_flag = use; }
@@ -119,7 +112,7 @@ struct Mesh
     void clear   ();
     bool isEmpty () const;
 
-    ~Mesh(){}
+    ~Mesh(){};
 
 private:
     bool _isInited, _use_color_flag;
